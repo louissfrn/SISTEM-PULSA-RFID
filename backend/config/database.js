@@ -7,7 +7,7 @@ const mysql = require('mysql2/promise');
 
 // Create connection pool
 const pool = mysql.createPool({
-  host:  'mysql.railway.internal',
+  host:  'interchange.proxy.rlwy.net',
   user: 'root',
   password: 'GuNRzsposwpMYpJnUXplXpzTvKkbJbJi',
   database: 'railway',
