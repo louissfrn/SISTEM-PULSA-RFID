@@ -1,0 +1,465 @@
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.payment-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 450px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s ease-out;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f3f4f6;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background: #e5e7eb;
+  transform: rotate(90deg);
+}
+
+.payment-modal-content h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.payment-info {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.payment-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.payment-amount .label {
+  color: #666;
+  font-size: 14px;
+}
+
+.payment-amount .amount {
+  color: #10b981;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.payment-timer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.payment-timer span:first-child {
+  color: #666;
+  font-size: 14px;
+}
+
+.payment-timer .timer {
+  color: #10b981;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.payment-timer .timer.warning {
+  color: #ef4444;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.qr-code-container {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.qr-code {
+  width: 280px;
+  height: 280px;
+  border: 3px solid #e5e7eb;
+  border-radius: 15px;
+  padding: 10px;
+  background: white;
+}
+
+.qr-instruction {
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
+}
+
+.payment-methods {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 10px;
+}
+
+.payment-methods img {
+  height: 30px;
+  object-fit: contain;
+}
+
+.payment-checking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.checking-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #d1fae5;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.payment-checking p {
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cancel-payment-btn {
+  width: 100%;
+  background: #f3f4f6;
+  color: #333;
+  border: 2px solid #e5e7eb;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-payment-btn:hover {
+  background: #e5e7eb;
+}
+
+.cancel-payment-btn:active {
+  transform: scale(0.98);
+}
+
+/* ✅ SUCCESS SCREEN */
+.payment-success-screen {
+  text-align: center;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  animation: successFadeIn 0.5s ease-out;
+}
+
+@keyframes successFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-animation {
+  margin-bottom: 30px;
+  display: none; /* ✅ HAPUS ICON CENTANG */
+}
+
+.success-icon {
+  font-size: 100px;
+  display: none; /* ✅ HAPUS */
+  animation: successBounce 0.6s ease-out;
+  margin: 0;
+}
+
+@keyframes successBounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.success-title {
+  font-size: 28px;
+  color: #10b981;
+  font-weight: 700;
+  margin: 20px 0 15px 0;
+  line-height: 1.3;
+}
+
+.success-message {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 25px 0;
+  line-height: 1.5;
+  display: none; /* ✅ HAPUS "Selamat! Pembayaran Anda berhasil" */
+}
+
+.success-amount {
+  background: white; /* ✅ UBAH DARI HIJAU KE PUTIH */
+  border: none; /* ✅ HAPUS BORDER */
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.success-amount span {
+  font-size: 32px;
+  color: #10b981; /* ✅ TETAP HIJAU TAPI SIMPLER */
+  font-weight: 700;
+}
+
+.success-actions {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  flex-direction: column;
+}
+
+.btn-selesai,
+.btn-transaksi-lagi {
+  flex: 1;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-selesai {
+  background: #10b981;
+  color: white;
+}
+
+.btn-selesai:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-selesai:active {
+  transform: scale(0.98);
+}
+
+.btn-transaksi-lagi {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-transaksi-lagi:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-transaksi-lagi:active {
+  transform: scale(0.98);
+}
+
+/* ❌ FAILED SCREEN */
+.payment-failed-screen {
+  text-align: center;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.failed-icon {
+  font-size: 100px;
+  margin-bottom: 30px;
+  animation: failedShake 0.5s ease-out;
+  display: block;
+}
+
+@keyframes failedShake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.failed-title {
+  font-size: 28px;
+  color: #ef4444;
+  font-weight: 700;
+  margin: 20px 0 15px 0;
+}
+
+.failed-message {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 30px 0;
+}
+
+.failed-actions {
+  width: 100%;
+}
+
+.btn-kembali {
+  width: 100%;
+  padding: 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-kembali:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+}
+
+.btn-kembali:active {
+  transform: scale(0.98);
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .payment-modal-content {
+    padding: 20px;
+    min-height: auto;
+    border-radius: 15px;
+  }
+
+  .qr-code {
+    width: 240px;
+    height: 240px;
+  }
+
+  .payment-amount .amount {
+    font-size: 20px;
+  }
+
+  .success-icon,
+  .failed-icon {
+    font-size: 80px;
+  }
+
+  .success-title,
+  .failed-title {
+    font-size: 24px;
+  }
+
+  .success-amount span {
+    font-size: 28px;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+
+  .btn-selesai,
+  .btn-transaksi-lagi,
+  .btn-kembali {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .payment-modal-content {
+    max-width: 100%;
+  }
+
+  .success-title,
+  .failed-title {
+    font-size: 22px;
+  }
+
+  .success-icon,
+  .failed-icon {
+    font-size: 70px;
+  }
+}
