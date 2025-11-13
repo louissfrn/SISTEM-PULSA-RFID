@@ -7,10 +7,10 @@ const mysql = require('mysql2/promise');
 
 // Create connection pool
 const pool = mysql.createPool({
-  host: 'localhost',
+  host:  'mysql.railway.internal',
   user: 'root',
-  password: '', // sesuaikan dengan setup MySQL Anda
-  database: 'sistem_rfid_lijaya',
+  password: 'GuNRzsposwpMYpJnUXplXpzTvKkbJbJi',
+  database: 'railway',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
