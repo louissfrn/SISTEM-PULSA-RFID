@@ -350,8 +350,8 @@ app.post('/api/rfid/scan', async (req, res) => {
     const [results] = await db.execute(`
       SELECT rc.RFID_Card_ID, rc.RFID_Code, rc.Balance, rc.Status as Card_Status,
              c.Customer_ID, c.Name, c.Phone_Number, c.Email
-      FROM rifd_card rc
-      JOIN Customer c ON rc.Customer_ID = c.Customer_ID
+      FROM rfid_card rc
+      JOIN customer c ON rc.Customer_ID = c.Customer_ID
       WHERE rc.RFID_Code = ? AND rc.Status = 'active'
     `, [rfidCode]);
 
