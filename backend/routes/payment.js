@@ -42,7 +42,7 @@ router.post('/create-saldo-payment', async (req, res) => {
 
     // Get RFID Card berdasarkan ID yang dikirim (BUKAN ambil random)
     const [rfidCard] = await connection.execute(
-      `SELECT RFID_Card_ID, Balance FROM RFID_Card 
+      `SELECT RFID_Card_ID, Balance FROM rfid_card 
        WHERE RFID_Card_ID = ? AND Customer_ID = ? AND Status = 'active'`,
       [rfidCardId, customerId]  // ← Gunakan ID yang dikirim + verify customer
     );
@@ -179,7 +179,7 @@ router.post('/create-saldo-payment-cash', async (req, res) => {
 
     // Verify RFID Card exists dan sesuai dengan customer
     const [rfidCardData] = await connection.execute(
-      `SELECT RFID_Card_ID, Balance FROM RFID_Card 
+      `SELECT RFID_Card_ID, Balance FROM rfid_card 
        WHERE RFID_Card_ID = ? AND Customer_ID = ? AND Status = 'active'`,
       [rfidCardId, customerId]  // ← Verify baik ID dan Customer ID
     );
@@ -289,17 +289,6 @@ router.post('/create-pulsa-payment', async (req, res) => {
     const transactionId = transactionResult.insertId;
     console.log('Transaction created for isi_pulsa:', { transactionId, transactionCode, rfidCardId });
 
-    // Create transaction detail
-    await connection.execute(
-      `INSERT INTO transaction_detail (
-        Transaction_ID, Product_Detail_ID, Target_Phone_Number,
-        Quantity, Unit_Price, Subtotal, Status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        transactionId, productDetailId, targetPhone,
-        1, product.Selling_Price, product.Selling_Price, 'pending'
-      ]
-    );
 
     // Create Midtrans payment
     const paymentResult = await midtransService.createPulsaPayment(
@@ -314,11 +303,11 @@ router.post('/create-pulsa-payment', async (req, res) => {
     );
 
     if (paymentResult.success) {
-      // ✅ CONSOLIDATE: Tidak perlu INSERT ke PAYMENT & PAYMENT_DETAIL
+      // CONSOLIDATE: Tidak perlu INSERT ke PAYMENT & PAYMENT_DETAIL
       // Semua data sudah tercakup di TRANSACTION & TRANSACTION_DETAIL
 
       await connection.commit();
-      console.log('✅ Pulsa QRIS payment created:', { transactionId, amount: product.Selling_Price, rfidCardId });
+      console.log('Pulsa QRIS payment created:', { transactionId, amount: product.Selling_Price, rfidCardId });
 
       res.json({
         success: true,
