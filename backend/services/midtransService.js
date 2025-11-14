@@ -24,16 +24,16 @@ class MidtransService {
   }
 
   formatDateForMidtrans(date = new Date()) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  }
-
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+  // Format yang benar: yyyy-MM-dd hh:mm:ss Z (dengan spasi sebelum timezone)
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0700`;
+}
   async createSaldoPayment(transactionId, amount, customerDetails) {
     try {
       const timestamp = Date.now();
