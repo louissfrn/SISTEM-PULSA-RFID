@@ -350,7 +350,7 @@ app.post('/api/rfid/scan', async (req, res) => {
     const [results] = await db.execute(`
       SELECT rc.RFID_Card_ID, rc.RFID_Code, rc.Balance, rc.Status as Card_Status,
              c.Customer_ID, c.Name, c.Phone_Number, c.Email
-      FROM RFID_Card rc
+      FROM rifd_card rc
       JOIN Customer c ON rc.Customer_ID = c.Customer_ID
       WHERE rc.RFID_Code = ? AND rc.Status = 'active'
     `, [rfidCode]);
@@ -396,8 +396,8 @@ app.get('/api/products/pulsa/:provider', async (req, res) => {
     const { provider } = req.params;
     const [products] = await db.execute(`
       SELECT pd.Product_Detail_ID, pd.Detail_Name, pd.Nominal, pd.Selling_Price, pd.IAK_Product_Code
-      FROM Product_Detail pd
-      JOIN Product p ON pd.Product_ID = p.Product_ID
+      FROM product_detail pd
+      JOIN product p ON pd.Product_ID = p.Product_ID
       WHERE p.Telco_Provider = ? AND p.Category = 'pulsa' AND pd.Status = 'active'
       ORDER BY pd.Nominal ASC
     `, [provider]);
