@@ -24,15 +24,18 @@ class MidtransService {
   }
 
   formatDateForMidtrans(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
+  // Add 1 hour buffer untuk expiry
+  const expiryDate = new Date(date.getTime() + 60 * 60 * 1000);
   
-  // Format yang benar: yyyy-MM-dd hh:mm:ss Z (dengan spasi sebelum timezone)
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0700`;
+  const year = expiryDate.getFullYear();
+  const month = String(expiryDate.getMonth() + 1).padStart(2, '0');
+  const day = String(expiryDate.getDate()).padStart(2, '0');
+  const hours = String(expiryDate.getHours()).padStart(2, '0');
+  const minutes = String(expiryDate.getMinutes()).padStart(2, '0');
+  const seconds = String(expiryDate.getSeconds()).padStart(2, '0');
+  
+  // Format: yyyy-MM-dd hh:mm:ss Z
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0000`;
 }
   async createSaldoPayment(transactionId, amount, customerDetails) {
     try {
