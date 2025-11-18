@@ -210,7 +210,7 @@ router.post('/create-pulsa', async (req, res) => {
         );
 
         await connection.execute(
-          'UPDATE Transaction_Detail SET Status = ? WHERE Transaction_ID = ?',
+          'UPDATE transaction SET Status = ? WHERE Transaction_ID = ?',
           ['failed', transactionId]
         );
 
