@@ -30,7 +30,7 @@ router.post('/create-pulsa', async (req, res) => {
 
     // Get product detail
     const [productDetail] = await connection.execute(
-      'SELECT * FROM Product_Detail WHERE Product_Detail_ID = ?',
+      'SELECT * FROM product_detail WHERE Product_Detail_ID = ?',
       [productDetailId]
     );
 
@@ -54,13 +54,13 @@ router.post('/create-pulsa', async (req, res) => {
       console.log('Product price:', product.Selling_Price);
 
       const [allRfidCards] = await connection.execute(
-        'SELECT * FROM RFID_Card WHERE Customer_ID = ?',
+        'SELECT * FROM rfid_card WHERE Customer_ID = ?',
         [customerId]
       );
       console.log('All RFID Cards for customer:', allRfidCards);
 
       const [rfidCard] = await connection.execute(
-        'SELECT * FROM RFID_Card WHERE RFID_Card_ID = ?',
+        'SELECT * FROM rfid_card WHERE RFID_Card_ID = ?',
         [rfidCardId]
       );
 
@@ -91,7 +91,7 @@ router.post('/create-pulsa', async (req, res) => {
 
     //ISI PULSA VIA SALDO RFID
     const [transactionResult] = await connection.execute(
-      `INSERT INTO Transaction (
+      `INSERT INTO transaction (
     Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
     Total_Amount, Payment_Method, Payment_Status, SIM_ID, 
     Target_Phone_Number, Product_Detail_ID
@@ -139,7 +139,7 @@ router.post('/create-pulsa', async (req, res) => {
 
         // Update transaction status
         await connection.execute(
-          'UPDATE Transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
+          'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
           ['success', transactionId]
         );
 
@@ -147,7 +147,7 @@ router.post('/create-pulsa', async (req, res) => {
 
         // Ambil saldo RFID untuk update
         const [rfidCard] = await connection.execute(
-          'SELECT Balance FROM RFID_Card WHERE RFID_Card_ID = ?',
+          'SELECT Balance FROM rfid_card WHERE RFID_Card_ID = ?',
           [rfidCardId]
         );
 
@@ -156,13 +156,13 @@ router.post('/create-pulsa', async (req, res) => {
 
         // Update RFID balance
         await connection.execute(
-          'UPDATE RFID_Card SET Balance = ? WHERE RFID_Card_ID = ?',
+          'UPDATE rfid_card SET Balance = ? WHERE RFID_Card_ID = ?',
           [balanceAfter, rfidCardId]
         );
 
         // Add balance history
         await connection.execute(
-          `INSERT INTO Balance_History (
+          `INSERT INTO balance_history (
             RFID_Card_ID, Transaction_ID, Transaction_Type,
             Amount, Balance_Before, Balance_After
           ) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -205,7 +205,7 @@ router.post('/create-pulsa', async (req, res) => {
 
         // Update transaction status to failed
         await connection.execute(
-          'UPDATE Transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
+          'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
           ['failed', transactionId]
         );
 
@@ -320,7 +320,7 @@ router.get('/history/:customerId', async (req, res) => {
     t.Target_Phone_Number,
     pd.Detail_Name as Product_Name,
     pd.Nominal as Denomination  
-  FROM Transaction t
+  FROM transaction t
   LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
   WHERE t.Customer_ID = ?
   ORDER BY t.Created_At DESC
@@ -367,10 +367,10 @@ router.get('/detail/:transactionId', async (req, res) => {
     pd.Product_Name,
     pd.Denomination,
     pd.Provider
-  FROM Transaction t
-  LEFT JOIN Customer c ON t.Customer_ID = c.Customer_ID
+  FROM transaction t
+  LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
   LEFT JOIN RFID_Card rc ON t.RFID_Card_ID = rc.RFID_Card_ID
-  LEFT JOIN Product_Detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+  LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
   WHERE t.Transaction_ID = ?
 `, [transactionId]);
 
