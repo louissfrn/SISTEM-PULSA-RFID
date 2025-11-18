@@ -208,12 +208,6 @@ router.post('/create-pulsa', async (req, res) => {
           'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
           ['failed', transactionId]
         );
-
-        await connection.execute(
-          'UPDATE transaction SET Status = ? WHERE Transaction_ID = ?',
-          ['failed', transactionId]
-        );
-
         await connection.commit();
 
         // Return error response
