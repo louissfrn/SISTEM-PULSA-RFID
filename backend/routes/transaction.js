@@ -321,7 +321,7 @@ router.get('/history/:customerId', async (req, res) => {
     pd.Detail_Name as Product_Name,
     pd.Nominal as Denomination  
   FROM Transaction t
-  LEFT JOIN Product_Detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+  LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
   WHERE t.Customer_ID = ?
   ORDER BY t.Created_At DESC
   LIMIT ? OFFSET ?
