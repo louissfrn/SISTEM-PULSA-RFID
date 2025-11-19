@@ -123,6 +123,8 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
   };
   const handlePaymentCancel = () => {
     console.log('User cancel payment');
+    setShowPayment(false); 
+    setPaymentData(null);  
     // ✅ HANYA close modal, JANGAN reset state
     // Biarkan PaymentModal handle cleanup-nya
   };
