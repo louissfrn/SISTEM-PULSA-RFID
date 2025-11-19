@@ -49,6 +49,7 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
           setPaymentData({
             type: 'saldo',
             amount: numAmount,
+            transaction_id: response.transaction_id,
             payment_token: response.payment_token,
             order_id: response.order_id
           });
@@ -94,7 +95,7 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
 
   // ✅ FIXED: Handle payment success dari PaymentModal
   const handlePaymentSuccess = (result) => {
-    console.log('🎉 Payment Success Result dari PaymentModal:', result);
+    console.log('Payment Success Result dari PaymentModal:', result);
     
     // ✅ PaymentModal sudah emit callback dengan action
     // TopUpSaldo hanya pass ke App.js via onBalanceUpdated
