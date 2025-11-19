@@ -39,8 +39,7 @@ class MidtransService {
 }
   async createSaldoPayment(transactionId, amount, customerDetails) {
     try {
-      const timestamp = Date.now();
-      const orderId = `SALDO-${transactionId}-${timestamp}`;
+      const orderId = `SALDO-${transactionId}`;
       
       const parameter = {
         transaction_details: {
@@ -71,10 +70,10 @@ class MidtransService {
         }
       };
 
-      console.log('📤 Creating Midtrans transaction:', { orderId, amount, transactionId });
+      console.log('Creating Midtrans transaction:', { orderId, amount, transactionId });
       const transaction = await this.snap.createTransaction(parameter);
       
-      console.log('✅ Midtrans transaction created:', { orderId, token: transaction.token });
+      console.log('Midtrans transaction created:', { orderId, token: transaction.token });
       
       return {
         success: true,
@@ -146,8 +145,7 @@ class MidtransService {
 
   async createSimPayment(purchaseId, amount, simDetails) {
     try {
-      const timestamp = Date.now();
-      const orderId = `SIM-${purchaseId}-${timestamp}`;
+      const orderId = `SIM-${purchaseId}`;
       
       const parameter = {
         transaction_details: {
