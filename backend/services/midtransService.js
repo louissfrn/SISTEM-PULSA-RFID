@@ -38,58 +38,64 @@ class MidtransService {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0000`;
 }
   async createSaldoPayment(transactionId, amount, customerDetails) {
-    try {
-      const timestamp = Date.now();
-      const orderId = `SALDO-${transactionId}-${timestamp}`;
-      
-      const parameter = {
-        transaction_details: {
-          order_id: orderId,
-          gross_amount: amount
-        },
-        credit_card: {
-          secure: true
-        },
-        customer_details: {
-          first_name: customerDetails.name,
-          email: customerDetails.email || 'customer@example.com',
-          phone: customerDetails.phone
-        },
-        item_details: [{
-          id: 'RFID_TOPUP',
-          price: amount,
-          quantity: 1,
-          name: `Top Up Saldo RFID - ${customerDetails.name}`
-        }],
-        callbacks: {
-          finish: `${process.env.FRONTEND_URL}/payment/finish`
-        },
-        expiry: {
-          start_time: this.formatDateForMidtrans(),
-          unit: "minutes",
-          duration: 15
-        }
-      };
+  try {
+    const timestamp = Date.now();
+    const orderId = `SALDO-${transactionId}-${timestamp}`;
+    
+    const parameter = {
+      transaction_details: {
+        order_id: orderId,
+        gross_amount: amount
+      },
+      credit_card: {
+        secure: true
+      },
+      customer_details: {
+        first_name: customerDetails.name,
+        email: customerDetails.email || 'customer@example.com',
+        phone: customerDetails.phone
+      },
+      item_details: [{
+        id: 'RFID_TOPUP',
+        price: amount,
+        quantity: 1,
+        name: `Top Up Saldo RFID - ${customerDetails.name}`
+      }],
+      callbacks: {
+        finish: `${process.env.FRONTEND_URL}/payment/finish`
+      },
+      expiry: {
+        start_time: this.formatDateForMidtrans(),
+        unit: "minutes",
+        duration: 15
+      }
+    };
 
-      console.log('Creating Midtrans transaction:', { orderId, amount, transactionId });
-      const transaction = await this.snap.createTransaction(parameter);
-      
-      console.log('Midtrans transaction created:', { orderId, token: transaction.token });
-      
-      return {
-        success: true,
-        token: transaction.token,
-        redirect_url: transaction.redirect_url,
-        order_id: orderId
-      };
-    } catch (error) {
-      console.error('Midtrans create payment error:', error.message);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    console.log('Creating Midtrans transaction:', { orderId, amount, transactionId });
+    console.log('Parameter:', JSON.stringify(parameter, null, 2)); // ← DEBUG
+    
+    const transaction = await this.snap.createTransaction(parameter);
+    
+    console.log('Midtrans transaction created:', { orderId, token: transaction.token });
+    
+    return {
+      success: true,
+      token: transaction.token,
+      redirect_url: transaction.redirect_url,
+      order_id: orderId
+    };
+  } catch (error) {
+    console.error('Midtrans create payment error:', {
+      message: error.message,
+      statusCode: error.httpStatusCode,
+      response: error.ApiResponse // ← Lihat detail error
+    });
+    return {
+      success: false,
+      error: error.message
+    };
   }
+}
 
   async createPulsaPayment(transactionId, amount, customerDetails, pulsaDetails) {
     try {
