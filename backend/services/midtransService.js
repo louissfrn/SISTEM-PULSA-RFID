@@ -39,7 +39,8 @@ class MidtransService {
 }
   async createSaldoPayment(transactionId, amount, customerDetails) {
     try {
-      const orderId = `SALDO-${transactionId}`;
+      const timestamp = Date.now();
+      const orderId = `SALDO-${transactionId}-${timestamp}`;
       
       const parameter = {
         transaction_details: {
@@ -82,7 +83,7 @@ class MidtransService {
         order_id: orderId
       };
     } catch (error) {
-      console.error('❌ Midtrans create payment error:', error.message);
+      console.error('Midtrans create payment error:', error.message);
       return {
         success: false,
         error: error.message
@@ -123,10 +124,10 @@ class MidtransService {
         }
       };
 
-      console.log('📤 Creating Midtrans PULSA transaction:', { orderId, amount, transactionId });
+      console.log('Creating Midtrans PULSA transaction:', { orderId, amount, transactionId });
       const transaction = await this.snap.createTransaction(parameter);
       
-      console.log('✅ Midtrans PULSA transaction created:', { orderId, token: transaction.token });
+      console.log('Midtrans PULSA transaction created:', { orderId, token: transaction.token });
       
       return {
         success: true,
@@ -135,7 +136,7 @@ class MidtransService {
         order_id: orderId
       };
     } catch (error) {
-      console.error('❌ Midtrans create pulsa payment error:', error.message);
+      console.error('Midtrans create pulsa payment error:', error.message);
       return {
         success: false,
         error: error.message
@@ -145,7 +146,8 @@ class MidtransService {
 
   async createSimPayment(purchaseId, amount, simDetails) {
     try {
-      const orderId = `SIM-${purchaseId}`;
+      const timestamp = Date.now();
+      const orderId = `SIM-${purchaseId}-${timestamp}`;
       
       const parameter = {
         transaction_details: {
@@ -176,10 +178,10 @@ class MidtransService {
         }
       };
 
-      console.log('📤 Creating Midtrans SIM transaction:', { orderId, amount, purchaseId });
+      console.log('Creating Midtrans SIM transaction:', { orderId, amount, purchaseId });
       const transaction = await this.snap.createTransaction(parameter);
       
-      console.log('✅ Midtrans SIM transaction created:', { orderId, token: transaction.token });
+      console.log('Midtrans SIM transaction created:', { orderId, token: transaction.token });
       
       return {
         success: true,
@@ -188,7 +190,7 @@ class MidtransService {
         order_id: orderId
       };
     } catch (error) {
-      console.error('❌ Midtrans create SIM payment error:', error.message);
+      console.error('Midtrans create SIM payment error:', error.message);
       return {
         success: false,
         error: error.message
@@ -204,7 +206,7 @@ class MidtransService {
       const transactionStatus = statusResponse.transaction_status;
       const fraudStatus = statusResponse.fraud_status;
 
-      console.log(`✅ Notification received - Order: ${orderId}, Status: ${transactionStatus}`);
+      console.log(`Notification received - Order: ${orderId}, Status: ${transactionStatus}`);
 
       let paymentStatus = 'pending';
 
@@ -234,7 +236,7 @@ class MidtransService {
       };
 
     } catch (error) {
-      console.error('❌ Midtrans notification error:', error.message);
+      console.error('Midtrans notification error:', error.message);
       return {
         success: false,
         error: error.message
@@ -244,11 +246,11 @@ class MidtransService {
 
   async checkPaymentStatus(orderId) {
     try {
-      console.log('📡 [Midtrans] Checking status for order:', orderId);
+      console.log('[Midtrans] Checking status for order:', orderId);
       
       const statusResponse = await this.coreApi.transaction.status(orderId);
       
-      console.log('✅ [Midtrans] Response received:', {
+      console.log('[Midtrans] Response received:', {
         order_id: statusResponse.order_id,
         transaction_status: statusResponse.transaction_status,
         fraud_status: statusResponse.fraud_status
@@ -259,7 +261,7 @@ class MidtransService {
         data: statusResponse
       };
     } catch (error) {
-      console.error('❌ [Midtrans] Check payment error:', {
+      console.error('[Midtrans] Check payment error:', {
         orderId,
         message: error.message,
         statusCode: error.httpStatusCode,
