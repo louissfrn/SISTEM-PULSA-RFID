@@ -130,9 +130,8 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
   };
 
   const handleTransaksiLagi = () => {
-    console.log('👆 User clicked "Transaksi Lagi" button');
+    console.log('User clicked "Transaksi Lagi" button');
     
-    // ✅ Emit callback DULU
     if (onPaymentSuccess) {
       onPaymentSuccess({
         action: 'transaksi_lagi',
@@ -140,9 +139,19 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
       });
     }
     
-    // ✅ Close modal langsung
     onClose();
   };
+
+  const handleSelesai = () => {
+  console.log('User clicked selesai button');
+  if (onPaymentSuccess) {
+    onPaymentSuccess({
+      success: true,
+      action: 'selesai'
+    });
+  }
+  onClose();
+};
 
   if (!isOpen) return null;
 
@@ -228,7 +237,6 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
 
         {paymentStatus === 'failed' && (
           <div className="payment-failed-screen">
-            <div className="failed-icon">❌</div>
             <h2 className="failed-title">Pembayaran Gagal</h2>
             <p className="failed-message">{successMessage}</p>
             
