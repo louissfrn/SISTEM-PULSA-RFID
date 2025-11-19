@@ -117,17 +117,26 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
   };
 
   const handleCancel = async () => {
-    try {
-      if (paymentData?.transaction_id) {
-        await api.cancelPayment(paymentData.transaction_id);
-        console.log('Transaction cancelled');
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error cancelling payment:', error);
-      onClose();
+  console.log('🔴 CANCEL BUTTON CLICKED');
+  console.log('Transaction ID:', paymentData?.transaction_id);
+  
+  try {
+    // Set status ke cancelled DULU sebelum API call
+    setPaymentStatus('cancelled');
+    
+    if (paymentData?.transaction_id) {
+      console.log('Calling cancelPayment API...');
+      const result = await api.cancelPayment(paymentData.transaction_id);
+      console.log('Cancel result:', result);
     }
-  };
+    
+    console.log('Calling onClose...');
+    onClose();
+  } catch (error) {
+    console.error('Error in handleCancel:', error);
+    onClose();
+  }
+};
 
   const handleTransaksiLagi = () => {
     console.log('User clicked "Transaksi Lagi" button');
