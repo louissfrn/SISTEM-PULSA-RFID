@@ -107,6 +107,7 @@ const BuySIMCard = ({ onBack }) => {
             type: 'sim',
             amount: simData.sellingPrice,
             phoneNumber: simData.phoneNumber,
+             transaction_id: response.transaction_id,
             payment_token: response.payment_token,
             order_id: response.order_id,
             purchase_id: response.purchase_id
@@ -176,6 +177,24 @@ const BuySIMCard = ({ onBack }) => {
     setErrorMessage('');
     setSuccessMessage('');
   };
+
+  const handlePaymentCancel = async () => {
+  console.log('User cancel SIM payment');
+  
+  try {
+    // Cancel transaksi di backend
+    if (paymentData?.transaction_id) {
+      await api.cancelPayment(paymentData.transaction_id);
+      console.log('Transaction cancelled');
+    }
+  } catch (error) {
+    console.error('Error cancelling payment:', error);
+  }
+  
+  // Close modal
+  setShowPayment(false);
+  setPaymentData(null);
+};
 
   // =======================================
   // RENDER: SCAN PAGE
@@ -415,13 +434,13 @@ const BuySIMCard = ({ onBack }) => {
 
         {/* Payment Modal untuk QRIS */}
         {showPayment && paymentData && (
-          <PaymentModal
-            isOpen={showPayment}
-            onClose={() => setShowPayment(false)}
-            paymentData={paymentData}
-            onPaymentSuccess={handlePaymentSuccess}
-          />
-        )}
+  <PaymentModal
+    isOpen={showPayment}
+    onClose={handlePaymentCancel}
+    paymentData={paymentData}
+    onPaymentSuccess={handlePaymentSuccess}
+  />
+)}
       </div>
     );
   }
