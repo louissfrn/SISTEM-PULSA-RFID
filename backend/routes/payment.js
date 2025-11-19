@@ -611,4 +611,37 @@ router.get('/status/:orderId', async (req, res) => {
   }
 });
 
+// Cancel payment
+router.post('/cancel-payment', async (req, res) => {
+  let connection;
+
+  try {
+    const { transactionId } = req.body;
+
+    if (!transactionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Transaction ID required'
+      });
+    }
+
+    connection = await pool.getConnection();
+
+    // Update transaksi ke cancelled
+    await connection.execute(
+      'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
+      ['cancelled', transactionId]
+    );
+
+    connection.release();
+    console.log('Transaction cancelled:', transactionId);
+
+    res.json({ success: true });
+  } catch (error) {
+    if (connection) connection.release();
+    console.error('Cancel payment error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

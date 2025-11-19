@@ -11,7 +11,7 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
 
   useEffect(() => {
     if (isOpen && paymentData?.payment_token) {
-      console.log('📦 PaymentModal opened');
+      console.log('PaymentModal opened');
       console.log(`Order ID: ${paymentData.order_id}`);
       console.log(`Amount: Rp ${paymentData.amount?.toLocaleString('id-ID')}`);
       
@@ -90,11 +90,11 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
           // Callback akan dipanggil dari handleSelesai() atau handleTransaksiLagi()
 
         } else if (txStatus === 'pending') {
-          console.log('⏳ Still pending...');
+          console.log('Still pending...');
         } else if (['deny', 'cancel', 'expire'].includes(txStatus)) {
-          console.log(`❌ Payment failed with status: ${txStatus}`);
+          console.log(`Payment failed with status: ${txStatus}`);
           setPaymentStatus('failed');
-          setSuccessMessage('❌ Pembayaran gagal atau dibatalkan');
+          setSuccessMessage('Pembayaran gagal atau dibatalkan');
           
           setTimeout(() => {
             onClose();
@@ -116,19 +116,17 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSelesai = () => {
-    console.log('👆 User clicked "Selesai" button');
-    
-    // ✅ Emit callback DULU (agar TopUpSaldo/App tau user klik selesai)
-    if (onPaymentSuccess) {
-      onPaymentSuccess({
-        success: true,
-        action: 'selesai'
-      });
+  const handleCancel = async () => {
+    try {
+      if (paymentData?.transaction_id) {
+        await api.cancelPayment(paymentData.transaction_id);
+        console.log('Transaction cancelled');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error cancelling payment:', error);
+      onClose();
     }
-    
-    // ✅ Close modal langsung
-    onClose();
   };
 
   const handleTransaksiLagi = () => {
@@ -189,7 +187,7 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
               <p>Menunggu pembayaran...</p>
             </div>
 
-            <button className="cancel-payment-btn" onClick={onClose}>
+            <button className="cancel-payment-btn" onClick={handleCancel}>
               Batal
             </button>
           </>
@@ -198,7 +196,7 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
         {paymentStatus === 'success' && (
           <div className="payment-success-screen">
             <div className="success-animation">
-              <div className="success-icon">✅</div>
+              <div className="success-icon"></div>
             </div>
             
             <h2 className="success-title">Pembayaran Berhasil!</h2>

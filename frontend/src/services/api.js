@@ -185,6 +185,18 @@ const api = {
     }
   },
 
+   cancelPayment: async (transactionId) => {
+    try {
+      const response = await apiClient.post('/api/payment/cancel-payment', {
+        transactionId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Cancel payment error:', error);
+      throw error;
+    }
+  },
+
   // =======================================
   // SIM CARD FUNCTIONS
   // =======================================
