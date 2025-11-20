@@ -7,10 +7,10 @@ const router = express.Router();
 // ==========================================
 router.get('/summary', async (req, res) => {
   let connection;
-  
+
   try {
     const { startDate, endDate, paymentMethod, paymentStatus } = req.query;
-    
+
     connection = await pool.getConnection();
 
     // Build WHERE clause dynamically
@@ -122,10 +122,10 @@ router.get('/summary', async (req, res) => {
 // ==========================================
 router.get('/daily-chart', async (req, res) => {
   let connection;
-  
+
   try {
     const { startDate, endDate } = req.query;
-    
+
     connection = await pool.getConnection();
 
     const query = `
@@ -165,19 +165,21 @@ router.get('/daily-chart', async (req, res) => {
 // ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
-  
+
   try {
-    const { 
-      startDate, 
-      endDate, 
-      paymentMethod, 
-      paymentStatus, 
+    const {
+      startDate,
+      endDate,
+      paymentMethod,
+      paymentStatus,
       transactionType,
-      page = 1, 
-      limit = 20 
+      page = 1,
+      limit = 20
     } = req.query;
-    
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const limitNum = parseInt(limit);
+    const offsetNum = (parseInt(page) - 1) * limitNum;
+
     connection = await pool.getConnection();
 
     // Build WHERE clause
@@ -226,13 +228,13 @@ router.get('/transactions', async (req, res) => {
         pd.Nominal
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-      LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
+      LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
       LIMIT ? OFFSET ?
     `;
 
-    const queryParams = [...params, parseInt(limit), offset];
+    const queryParams = [...params, limitNum, offsetNum];
     const [transactions] = await connection.execute(query, queryParams);
 
     res.json({
@@ -241,9 +243,9 @@ router.get('/transactions', async (req, res) => {
         transactions: transactions || [],
         pagination: {
           page: parseInt(page),
-          limit: parseInt(limit),
+          limit: limitNum,
           total: totalCount,
-          totalPages: Math.ceil(totalCount / parseInt(limit))
+          totalPages: Math.ceil(totalCount / limitNum)
         }
       }
     });
@@ -258,16 +260,15 @@ router.get('/transactions', async (req, res) => {
     if (connection) connection.release();
   }
 });
-
 // ==========================================
 // GET PAYMENT METHOD BREAKDOWN
 // ==========================================
 router.get('/payment-breakdown', async (req, res) => {
   let connection;
-  
+
   try {
     const { startDate, endDate } = req.query;
-    
+
     connection = await pool.getConnection();
 
     const query = `
@@ -304,16 +305,60 @@ router.get('/payment-breakdown', async (req, res) => {
   }
 });
 
+// ==========================================
+// GET TOP PRODUCTS
+// ==========================================
+router.get('/top-products', async (req, res) => {
+  let connection;
+
+  try {
+    const { startDate, endDate, limit = 10 } = req.query;
+
+    connection = await pool.getConnection();
+
+    const query = `
+      SELECT 
+        pd.Product_Detail_ID,
+        pd.Detail_Name,
+        pd.Nominal,
+        COUNT(t.Transaction_ID) as totalSales,
+        SUM(CASE WHEN t.Payment_Status = 'success' THEN t.Total_Amount ELSE 0 END) as totalRevenue,
+        AVG(t.Total_Amount) as avgPrice
+      FROM transaction t
+      JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+      WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
+      GROUP BY pd.Product_Detail_ID, pd.Detail_Name, pd.Nominal
+      ORDER BY totalSales DESC
+      LIMIT ?
+    `;
+
+    const [topProducts] = await connection.execute(query, [startDate, endDate, parseInt(limit)]);
+
+    res.json({
+      success: true,
+      data: topProducts || []
+    });
+
+  } catch (error) {
+    console.error('Get top products error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Gagal memuat produk terlaris'
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
 
 // ==========================================
 // GET CUSTOMER STATISTICS
 // ==========================================
 router.get('/customer-stats', async (req, res) => {
   let connection;
-  
+
   try {
     const { startDate, endDate } = req.query;
-    
+
     connection = await pool.getConnection();
 
     // Total customers
@@ -375,14 +420,14 @@ router.get('/customer-stats', async (req, res) => {
 });
 
 // ==========================================
-// EXPORT DETAILED REPORT (for Excel/PDF)
+// EXPORT DETAILED REPORT (FIXED - No transaction_detail)
 // ==========================================
 router.get('/export-data', async (req, res) => {
   let connection;
-  
+
   try {
     const { startDate, endDate, paymentMethod, paymentStatus, format = 'json' } = req.query;
-    
+
     connection = await pool.getConnection();
 
     // Build WHERE clause
@@ -412,10 +457,12 @@ router.get('/export-data', async (req, res) => {
         t.Total_Amount,
         t.Target_Phone_Number,
         pd.Detail_Name,
-        pd.Nominal
+        pd.Nominal,
+        p.Product_Name
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-      LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
+      LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+      LEFT JOIN product p ON pd.Product_ID = p.Product_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
     `;
