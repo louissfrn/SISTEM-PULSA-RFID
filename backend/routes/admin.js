@@ -1060,7 +1060,7 @@ router.post('/approve-cash-payment', async (req, res) => {
             [customerId, null, 0, 'pending']
           );
 
-          console.log('✅ RFID card created (pending activation)');
+          console.log('RFID card created (pending activation)');
         } else {
           await connection.execute(
             `UPDATE rfid_card 
@@ -1069,7 +1069,7 @@ router.post('/approve-cash-payment', async (req, res) => {
             [existingRfidCards[0].RFID_Card_ID]
           );
 
-          console.log('✅ RFID card updated to pending');
+          console.log('RFID card updated to pending');
         }
       }
 

@@ -229,7 +229,7 @@ router.get('/transactions', async (req, res) => {
   LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
   ${whereClause}
   ORDER BY t.Created_At DESC
-  LIMIT ? OFFSET ?
+  LIMIT ${limitNum} OFFSET ${offsetNum}
 `;
 
     const queryParams = [...params, parseInt(limit), offset];
