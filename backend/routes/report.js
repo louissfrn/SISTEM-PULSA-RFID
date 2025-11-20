@@ -236,6 +236,12 @@ router.get('/transactions', async (req, res) => {
 
     // PENTING: Add limit dan offset ke params
     params.push(limitNum, offsetNum);
+    
+    console.log('DEBUG - Route /transactions');
+    console.log('Params array:', params);
+    console.log('Params length:', params.length);
+    console.log('Query:', query);
+    
     const [transactions] = await connection.execute(query, params);
 
     res.json({
