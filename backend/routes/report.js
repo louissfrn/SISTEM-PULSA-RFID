@@ -221,7 +221,7 @@ router.get('/transactions', async (req, res) => {
         t.Created_At,
         c.Name as Customer_Name,
         c.Phone_Number as Customer_Phone,
-        td.Target_Phone_Number,
+        t.Target_Phone_Number,
         pd.Detail_Name,
         pd.Nominal
       FROM transaction t
@@ -410,7 +410,7 @@ router.get('/export-data', async (req, res) => {
         t.Payment_Method,
         t.Payment_Status,
         t.Total_Amount,
-        td.Target_Phone_Number,
+        t.Target_Phone_Number,
         pd.Detail_Name,
         pd.Nominal
       FROM transaction t
