@@ -7,10 +7,10 @@ const router = express.Router();
 // ==========================================
 router.get('/summary', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate, paymentMethod, paymentStatus } = req.query;
-
+    
     connection = await pool.getConnection();
 
     // Build WHERE clause dynamically
@@ -122,10 +122,10 @@ router.get('/summary', async (req, res) => {
 // ==========================================
 router.get('/daily-chart', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate } = req.query;
-
+    
     connection = await pool.getConnection();
 
     const query = `
@@ -163,26 +163,21 @@ router.get('/daily-chart', async (req, res) => {
 // ==========================================
 // GET TRANSACTIONS LIST (PAGINATED & FILTERABLE)
 // ==========================================
-// ==========================================
-// GET TRANSACTIONS LIST (PAGINATED & FILTERABLE)
-// ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
-
+  
   try {
-    const {
-      startDate,
-      endDate,
-      paymentMethod,
-      paymentStatus,
+    const { 
+      startDate, 
+      endDate, 
+      paymentMethod, 
+      paymentStatus, 
       transactionType,
-      page = 1,
-      limit = 20
+      page = 1, 
+      limit = 20 
     } = req.query;
-
-    const limitNum = parseInt(limit);
-    const offsetNum = (parseInt(page) - 1) * limitNum;
-
+    
+    const offset = (parseInt(page) - 1) * parseInt(limit);
     connection = await pool.getConnection();
 
     // Build WHERE clause
@@ -226,18 +221,19 @@ router.get('/transactions', async (req, res) => {
         t.Created_At,
         c.Name as Customer_Name,
         c.Phone_Number as Customer_Phone,
-        t.Target_Phone_Number,
+        td.Target_Phone_Number,
         pd.Detail_Name,
         pd.Nominal
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-      LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+      LEFT JOIN transaction_detail td ON t.Transaction_ID = td.Transaction_ID
+      LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
       LIMIT ? OFFSET ?
     `;
 
-    const queryParams = [...params, limitNum, offsetNum];
+    const queryParams = [...params, parseInt(limit), offset];
     const [transactions] = await connection.execute(query, queryParams);
 
     res.json({
@@ -246,9 +242,9 @@ router.get('/transactions', async (req, res) => {
         transactions: transactions || [],
         pagination: {
           page: parseInt(page),
-          limit: limitNum,
+          limit: parseInt(limit),
           total: totalCount,
-          totalPages: Math.ceil(totalCount / limitNum)
+          totalPages: Math.ceil(totalCount / parseInt(limit))
         }
       }
     });
@@ -263,15 +259,16 @@ router.get('/transactions', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 // ==========================================
 // GET PAYMENT METHOD BREAKDOWN
 // ==========================================
 router.get('/payment-breakdown', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate } = req.query;
-
+    
     connection = await pool.getConnection();
 
     const query = `
@@ -313,10 +310,10 @@ router.get('/payment-breakdown', async (req, res) => {
 // ==========================================
 router.get('/top-products', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate, limit = 10 } = req.query;
-
+    
     connection = await pool.getConnection();
 
     const query = `
@@ -326,10 +323,11 @@ router.get('/top-products', async (req, res) => {
         COUNT(td.Transaction_Detail_ID) as totalSales,
         SUM(CASE WHEN t.Payment_Status = 'success' THEN td.Subtotal ELSE 0 END) as totalRevenue,
         AVG(td.Subtotal) as avgPrice
-      FROM transaction t
-      JOIN product_detail pd ON td.Product_Detail_ID = pd.Product_Detail_ID
+      FROM transaction_detail td
+      JOIN transaction t ON td.Transaction_ID = t.Transaction_ID
+      JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
       WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
-      GROUP BY pd.Product_Detail_ID, pd.Detail_Name, pd.Nominal
+      GROUP BY pd.Detail_ID, pd.Detail_Name, pd.Nominal
       ORDER BY totalSales DESC
       LIMIT ?
     `;
@@ -357,10 +355,10 @@ router.get('/top-products', async (req, res) => {
 // ==========================================
 router.get('/customer-stats', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate } = req.query;
-
+    
     connection = await pool.getConnection();
 
     // Total customers
@@ -426,10 +424,10 @@ router.get('/customer-stats', async (req, res) => {
 // ==========================================
 router.get('/export-data', async (req, res) => {
   let connection;
-
+  
   try {
     const { startDate, endDate, paymentMethod, paymentStatus, format = 'json' } = req.query;
-
+    
     connection = await pool.getConnection();
 
     // Build WHERE clause
@@ -463,7 +461,7 @@ router.get('/export-data', async (req, res) => {
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
       LEFT JOIN transaction_detail td ON t.Transaction_ID = td.Transaction_ID
-      LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Product_Detail_ID
+      LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
     `;
