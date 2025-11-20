@@ -65,7 +65,7 @@ router.post('/create-saldo-payment', async (req, res) => {
       `INSERT INTO transaction (
     Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
     Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
       [
         customerId, rfidCardIdUsed, transactionCode, 'top_up_saldo',
         amount, 'qris', 'pending', null, null
@@ -73,7 +73,7 @@ router.post('/create-saldo-payment', async (req, res) => {
     );
 
     const transactionId = transactionResult.insertId;
-    console.log('✅ Transaction created in DB first:', { transactionId, transactionCode, rfidCardId: rfidCardIdUsed });
+    console.log('transaction created in DB first:', { transactionId, transactionCode, rfidCardId: rfidCardIdUsed });
 
     // ==========================================
     // CREATE BALANCE_HISTORY RECORD - QRIS ONLY
@@ -86,7 +86,7 @@ router.post('/create-saldo-payment', async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
       [rfidCardIdUsed, transactionId, 'top_up', amount, balanceBefore, balanceAfter]
     );
-    console.log('✅ Balance history created:', { transactionId, type: 'top_up', amount, rfidCardId: rfidCardIdUsed });
+    console.log('Balance history created:', { transactionId, type: 'top_up', amount, rfidCardId: rfidCardIdUsed });
 
     // PENTING: Pass transactionId (bukan customerId) ke midtrans
     // Ini akan membuat order_id = SALDO-{transactionId}
@@ -105,7 +105,7 @@ router.post('/create-saldo-payment', async (req, res) => {
       // Semua data payment sudah ada di TRANSACTION table
 
       await connection.commit();
-      console.log('✅ Saldo QRIS payment created:', {
+      console.log('Saldo QRIS payment created:', {
         transactionId,
         amount,
         orderId: paymentResult.order_id,
@@ -130,7 +130,7 @@ router.post('/create-saldo-payment', async (req, res) => {
 
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('❌ Create saldo QRIS payment error:', error);
+    console.error('Create saldo QRIS payment error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
@@ -198,7 +198,7 @@ router.post('/create-saldo-payment-cash', async (req, res) => {
       `INSERT INTO transaction (
     Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
     Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
       [
         customerId, rfidCardId, transactionCode, 'top_up_saldo',
         amount, 'cash', 'pending', null, null
@@ -279,7 +279,7 @@ router.post('/create-pulsa-payment', async (req, res) => {
       `INSERT INTO transaction (
         Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
         Total_Amount, Payment_Method, Payment_Status, SIM_ID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
       [
         customerId, rfidCardId, transactionCode, 'isi_pulsa',
         product.Selling_Price, 'qris', 'pending', null
@@ -327,7 +327,7 @@ router.post('/create-pulsa-payment', async (req, res) => {
 
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('❌ Create pulsa payment error:', error);
+    console.error('Create pulsa payment error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
