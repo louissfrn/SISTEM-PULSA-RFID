@@ -211,7 +211,7 @@ router.get('/transactions', async (req, res) => {
     const [countResult] = await connection.execute(countQuery, params);
     const totalCount = countResult[0]?.total || 0;
 
-    // Get transactions with details - ADD LIMIT & OFFSET ke params
+    // Get transactions with details
     const query = `
       SELECT 
         t.Transaction_ID,
@@ -234,9 +234,9 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    // PENTING: Push limit dan offset ke params array
-    const queryParams = [...params, limitNum, offsetNum];
-    const [transactions] = await connection.execute(query, queryParams);
+    // PENTING: Add limit dan offset ke params
+    params.push(limitNum, offsetNum);
+    const [transactions] = await connection.execute(query, params);
 
     res.json({
       success: true,
@@ -261,6 +261,7 @@ router.get('/transactions', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
 // ==========================================
 // GET PAYMENT METHOD BREAKDOWN
 // ==========================================
@@ -307,7 +308,7 @@ router.get('/payment-breakdown', async (req, res) => {
 });
 
 // ==========================================
-// GET TOP PRODUCTS
+// GET TOP PRODUCTS - FIXED
 // ==========================================
 router.get('/top-products', async (req, res) => {
   let connection;
@@ -458,12 +459,10 @@ router.get('/export-data', async (req, res) => {
         t.Total_Amount,
         t.Target_Phone_Number,
         pd.Detail_Name,
-        pd.Nominal,
-        p.Product_Name
+        pd.Nominal
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
       LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
-      LEFT JOIN product p ON pd.Product_ID = p.Product_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
     `;
