@@ -161,7 +161,7 @@ router.get('/daily-chart', async (req, res) => {
 });
 
 // ==========================================
-// GET TRANSACTIONS LIST (PAGINATED & FILTERABLE)
+// GET TRANSACTIONS LIST (PAGINATED & FILTERABLE) - FIXED
 // ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
@@ -211,7 +211,7 @@ router.get('/transactions', async (req, res) => {
     const [countResult] = await connection.execute(countQuery, params);
     const totalCount = countResult[0]?.total || 0;
 
-    // Get transactions with details
+    // Get transactions with details - ADD LIMIT & OFFSET ke params
     const query = `
       SELECT 
         t.Transaction_ID,
@@ -234,6 +234,7 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
+    // PENTING: Push limit dan offset ke params array
     const queryParams = [...params, limitNum, offsetNum];
     const [transactions] = await connection.execute(query, queryParams);
 
