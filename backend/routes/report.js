@@ -163,6 +163,9 @@ router.get('/daily-chart', async (req, res) => {
 // ==========================================
 // GET TRANSACTIONS LIST (PAGINATED & FILTERABLE)
 // ==========================================
+// ==========================================
+// GET TRANSACTIONS LIST (PAGINATED & FILTERABLE)
+// ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
 
@@ -177,7 +180,9 @@ router.get('/transactions', async (req, res) => {
       limit = 20
     } = req.query;
 
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
+    const offsetNum = (parseInt(page) - 1) * limitNum;
+
     connection = await pool.getConnection();
 
     // Build WHERE clause
@@ -211,28 +216,28 @@ router.get('/transactions', async (req, res) => {
 
     // Get transactions with details
     const query = `
-  SELECT 
-    t.Transaction_ID,
-    t.Transaction_Code,
-    t.Transaction_Type,
-    t.Total_Amount,
-    t.Payment_Method,
-    t.Payment_Status,
-    t.Created_At,
-    c.Name as Customer_Name,
-    c.Phone_Number as Customer_Phone,
-    t.Target_Phone_Number,
-    pd.Detail_Name,
-    pd.Nominal
-  FROM transaction t
-  LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-  LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
-  ${whereClause}
-  ORDER BY t.Created_At DESC
-  LIMIT ${limitNum} OFFSET ${offsetNum}
-`;
+      SELECT 
+        t.Transaction_ID,
+        t.Transaction_Code,
+        t.Transaction_Type,
+        t.Total_Amount,
+        t.Payment_Method,
+        t.Payment_Status,
+        t.Created_At,
+        c.Name as Customer_Name,
+        c.Phone_Number as Customer_Phone,
+        t.Target_Phone_Number,
+        pd.Detail_Name,
+        pd.Nominal
+      FROM transaction t
+      LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
+      LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
+      ${whereClause}
+      ORDER BY t.Created_At DESC
+      LIMIT ? OFFSET ?
+    `;
 
-    const queryParams = [...params, parseInt(limit), offset];
+    const queryParams = [...params, limitNum, offsetNum];
     const [transactions] = await connection.execute(query, queryParams);
 
     res.json({
@@ -241,9 +246,9 @@ router.get('/transactions', async (req, res) => {
         transactions: transactions || [],
         pagination: {
           page: parseInt(page),
-          limit: parseInt(limit),
+          limit: limitNum,
           total: totalCount,
-          totalPages: Math.ceil(totalCount / parseInt(limit))
+          totalPages: Math.ceil(totalCount / limitNum)
         }
       }
     });
@@ -258,7 +263,6 @@ router.get('/transactions', async (req, res) => {
     if (connection) connection.release();
   }
 });
-
 // ==========================================
 // GET PAYMENT METHOD BREAKDOWN
 // ==========================================
