@@ -226,7 +226,6 @@ router.get('/transactions', async (req, res) => {
         pd.Nominal
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-      LEFT JOIN transaction_detail td ON t.Transaction_ID = td.Transaction_ID
       LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
@@ -305,50 +304,6 @@ router.get('/payment-breakdown', async (req, res) => {
   }
 });
 
-// ==========================================
-// GET TOP PRODUCTS
-// ==========================================
-router.get('/top-products', async (req, res) => {
-  let connection;
-  
-  try {
-    const { startDate, endDate, limit = 10 } = req.query;
-    
-    connection = await pool.getConnection();
-
-    const query = `
-      SELECT 
-        pd.Detail_Name,
-        pd.Nominal,
-        COUNT(td.Transaction_Detail_ID) as totalSales,
-        SUM(CASE WHEN t.Payment_Status = 'success' THEN td.Subtotal ELSE 0 END) as totalRevenue,
-        AVG(td.Subtotal) as avgPrice
-      FROM transaction_detail td
-      JOIN transaction t ON td.Transaction_ID = t.Transaction_ID
-      JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
-      WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
-      GROUP BY pd.Detail_ID, pd.Detail_Name, pd.Nominal
-      ORDER BY totalSales DESC
-      LIMIT ?
-    `;
-
-    const [topProducts] = await connection.execute(query, [startDate, endDate, parseInt(limit)]);
-
-    res.json({
-      success: true,
-      data: topProducts || []
-    });
-
-  } catch (error) {
-    console.error('Get top products error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Gagal memuat produk terlaris'
-    });
-  } finally {
-    if (connection) connection.release();
-  }
-});
 
 // ==========================================
 // GET CUSTOMER STATISTICS
@@ -460,7 +415,6 @@ router.get('/export-data', async (req, res) => {
         pd.Nominal
       FROM transaction t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
-      LEFT JOIN transaction_detail td ON t.Transaction_ID = td.Transaction_ID
       LEFT JOIN product_detail pd ON td.Product_Detail_ID = pd.Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
