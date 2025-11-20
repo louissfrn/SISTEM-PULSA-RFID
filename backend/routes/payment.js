@@ -64,8 +64,8 @@ router.post('/create-saldo-payment', async (req, res) => {
     const [transactionResult] = await connection.execute(
       `INSERT INTO transaction (
     Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
-    Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
+    Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID, Transaction_Date
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         customerId, rfidCardIdUsed, transactionCode, 'top_up_saldo',
         amount, 'qris', 'pending', null, null
@@ -197,8 +197,8 @@ router.post('/create-saldo-payment-cash', async (req, res) => {
     const [transactionResult] = await connection.execute(
       `INSERT INTO transaction (
     Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
-    Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
+    Total_Amount, Payment_Method, Payment_Status, SIM_ID, Product_Detail_ID, Transaction_Date
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         customerId, rfidCardId, transactionCode, 'top_up_saldo',
         amount, 'cash', 'pending', null, null
@@ -278,8 +278,8 @@ router.post('/create-pulsa-payment', async (req, res) => {
     const [transactionResult] = await connection.execute(
       `INSERT INTO transaction (
         Customer_ID, RFID_Card_ID, Transaction_Code, Transaction_Type,
-        Total_Amount, Payment_Method, Payment_Status, SIM_ID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '+07:00'))`,
+        Total_Amount, Payment_Method, Payment_Status, SIM_ID, Transaction_Date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         customerId, rfidCardId, transactionCode, 'isi_pulsa',
         product.Selling_Price, 'qris', 'pending', null
