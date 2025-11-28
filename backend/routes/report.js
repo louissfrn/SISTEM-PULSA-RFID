@@ -13,24 +13,27 @@ router.get('/summary', async (req, res) => {
 
     connection = await pool.getConnection();
 
-    // Build WHERE clause dynamically
-    let whereClause = 'WHERE 1=1';
+    let whereClauses = [];
     let params = [];
 
     if (startDate && endDate) {
-      whereClause += ' AND DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?';
+      whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
       params.push(startDate, endDate);
     }
 
     if (paymentMethod) {
-      whereClause += ' AND t.Payment_Method = ?';
+      whereClauses.push('t.Payment_Method = ?');
       params.push(paymentMethod);
     }
 
     if (paymentStatus) {
-      whereClause += ' AND t.Payment_Status = ?';
+      whereClauses.push('t.Payment_Status = ?');
       params.push(paymentStatus);
     }
+
+    const whereClause = whereClauses.length > 0 
+      ? 'WHERE ' + whereClauses.join(' AND ')
+      : '';
 
     // Query untuk total revenue
     const queryRevenue = `
@@ -42,7 +45,7 @@ router.get('/summary', async (req, res) => {
         AVG(CASE WHEN t.Payment_Status = 'success' THEN t.Total_Amount ELSE NULL END) as avgTransaction,
         COUNT(DISTINCT t.Customer_ID) as uniqueCustomers,
         COUNT(CASE WHEN t.Transaction_Type = 'isi_pulsa' THEN 1 END) as pulsaCount,
-        COUNT(CASE WHEN t.Transaction_Type = 'topup_saldo' THEN 1 END) as topupCount
+        COUNT(CASE WHEN t.Transaction_Type = 'top_up_saldo' THEN 1 END) as topupCount
       FROM transaction t
       ${whereClause}
     `;
@@ -76,24 +79,22 @@ router.get('/summary', async (req, res) => {
     const [statusBreakdown] = await connection.execute(queryStatusBreakdown, params);
 
     // Query untuk pending cash payments count
-    const queryPendingCash = `
-      SELECT COUNT(*) as pendingCashCount
-      FROM transaction t
-      WHERE t.Payment_Method IN ('kasir', 'cash') AND t.Payment_Status = 'pending'
-    `;
-
-    const [pendingCash] = await connection.execute(queryPendingCash);
+    const [pendingCash] = await connection.execute(
+      `SELECT COUNT(*) as pendingCashCount
+       FROM transaction t
+       WHERE t.Payment_Method IN ('kasir', 'cash') AND t.Payment_Status = 'pending'`
+    );
 
     // Query untuk new customers
-    const queryNewCustomers = `
-      SELECT COUNT(*) as newCustomersCount
-      FROM customer c
-      WHERE 1=1
-      ${startDate && endDate ? `AND DATE(c.Registration_Date) >= ? AND DATE(c.Registration_Date) <= ?` : ''}
-    `;
+    let newCustomersQuery = 'SELECT COUNT(*) as newCustomersCount FROM customer';
+    let customerParams = [];
 
-    const queryParams = startDate && endDate ? [startDate, endDate] : [];
-    const [newCustomers] = await connection.execute(queryNewCustomers, queryParams);
+    if (startDate && endDate) {
+      newCustomersQuery += ' WHERE DATE(Registration_Date) >= ? AND DATE(Registration_Date) <= ?';
+      customerParams = [startDate, endDate];
+    }
+
+    const [newCustomers] = await connection.execute(newCustomersQuery, customerParams);
 
     res.json({
       success: true,
@@ -107,10 +108,11 @@ router.get('/summary', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get report summary error:', error);
+    console.error('❌ Get report summary error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat ringkasan laporan'
+      error: 'Gagal memuat ringkasan laporan',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
@@ -125,6 +127,13 @@ router.get('/daily-chart', async (req, res) => {
 
   try {
     const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate dan endDate diperlukan'
+      });
+    }
 
     connection = await pool.getConnection();
 
@@ -150,10 +159,11 @@ router.get('/daily-chart', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get daily chart error:', error);
+    console.error('❌ Get daily chart error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat data grafik'
+      error: 'Gagal memuat data grafik',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
@@ -182,9 +192,7 @@ router.get('/transactions', async (req, res) => {
 
     connection = await pool.getConnection();
 
-    // ==========================================
-    // STEP 1: Build WHERE conditions
-    // ==========================================
+    // Build WHERE conditions
     let whereClauses = [];
     let countParams = [];
     let queryParams = [];
@@ -217,24 +225,12 @@ router.get('/transactions', async (req, res) => {
       ? 'WHERE ' + whereClauses.join(' AND ') 
       : '';
 
-    // ==========================================
-    // STEP 2: Get total count
-    // ==========================================
-    const countQuery = `
-      SELECT COUNT(*) as total 
-      FROM transaction t 
-      ${whereClause}
-    `;
-
-    console.log('📊 Count Query:', countQuery);
-    console.log('📊 Count Params:', countParams);
-
+    // Get total count
+    const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
     const [countResult] = await connection.execute(countQuery, countParams);
     const totalCount = countResult[0]?.total || 0;
 
-    // ==========================================
-    // STEP 3: Get transactions
-    // ==========================================
+    // Get transactions
     const transactionQuery = `
       SELECT 
         t.Transaction_ID,
@@ -257,15 +253,9 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    // Add limit and offset to queryParams
     queryParams.push(limitNum, offsetNum);
 
-    console.log('📊 Transaction Query:', transactionQuery);
-    console.log('📊 Query Params:', queryParams);
-
     const [transactions] = await connection.execute(transactionQuery, queryParams);
-
-    console.log('✅ Fetched transactions:', transactions.length);
 
     res.json({
       success: true,
@@ -281,9 +271,7 @@ router.get('/transactions', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get transactions error:', error.message);
-    console.error('❌ Error stack:', error.stack);
-    
+    console.error('❌ Get transactions error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data transaksi',
@@ -302,6 +290,13 @@ router.get('/payment-breakdown', async (req, res) => {
 
   try {
     const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate dan endDate diperlukan'
+      });
+    }
 
     connection = await pool.getConnection();
 
@@ -329,10 +324,11 @@ router.get('/payment-breakdown', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get payment breakdown error:', error);
+    console.error('❌ Get payment breakdown error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat breakdown pembayaran'
+      error: 'Gagal memuat breakdown pembayaran',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
@@ -340,13 +336,20 @@ router.get('/payment-breakdown', async (req, res) => {
 });
 
 // ==========================================
-// GET TOP PRODUCTS - FIXED
+// GET TOP PRODUCTS
 // ==========================================
 router.get('/top-products', async (req, res) => {
   let connection;
 
   try {
     const { startDate, endDate, limit = 10 } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate dan endDate diperlukan'
+      });
+    }
 
     connection = await pool.getConnection();
 
@@ -374,10 +377,11 @@ router.get('/top-products', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get top products error:', error);
+    console.error('❌ Get top products error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat produk terlaris'
+      error: 'Gagal memuat produk terlaris',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
@@ -393,30 +397,35 @@ router.get('/customer-stats', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate dan endDate diperlukan'
+      });
+    }
+
     connection = await pool.getConnection();
 
     // Total customers
-    const queryTotalCustomers = `
-      SELECT COUNT(*) as total FROM customer
-    `;
-    const [totalCustomers] = await connection.execute(queryTotalCustomers);
+    const [totalCustomers] = await connection.execute(
+      'SELECT COUNT(*) as total FROM customer'
+    );
 
     // Active customers
-    const queryActiveCustomers = `
-      SELECT COUNT(*) as total FROM customer WHERE Status = 'active'
-    `;
-    const [activeCustomers] = await connection.execute(queryActiveCustomers);
+    const [activeCustomers] = await connection.execute(
+      'SELECT COUNT(*) as total FROM customer WHERE Status = "active"'
+    );
 
     // New customers in period
-    const queryNewCustomers = `
-      SELECT COUNT(*) as total FROM customer 
-      WHERE DATE(Registration_Date) >= ? AND DATE(Registration_Date) <= ?
-    `;
-    const [newCustomers] = await connection.execute(queryNewCustomers, [startDate, endDate]);
+    const [newCustomers] = await connection.execute(
+      `SELECT COUNT(*) as total FROM customer 
+       WHERE DATE(Registration_Date) >= ? AND DATE(Registration_Date) <= ?`,
+      [startDate, endDate]
+    );
 
     // Top spending customers
-    const queryTopSpending = `
-      SELECT 
+    const [topSpending] = await connection.execute(
+      `SELECT 
         c.Customer_ID,
         c.Name,
         c.Phone_Number,
@@ -428,9 +437,9 @@ router.get('/customer-stats', async (req, res) => {
         AND t.Payment_Status = 'success'
       GROUP BY c.Customer_ID, c.Name, c.Phone_Number
       ORDER BY totalSpent DESC
-      LIMIT 10
-    `;
-    const [topSpending] = await connection.execute(queryTopSpending, [startDate, endDate]);
+      LIMIT 10`,
+      [startDate, endDate]
+    );
 
     res.json({
       success: true,
@@ -443,10 +452,11 @@ router.get('/customer-stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get customer stats error:', error);
+    console.error('❌ Get customer stats error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat statistik pelanggan'
+      error: 'Gagal memuat statistik pelanggan',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
@@ -454,7 +464,7 @@ router.get('/customer-stats', async (req, res) => {
 });
 
 // ==========================================
-// EXPORT DETAILED REPORT (FIXED - No transaction_detail)
+// EXPORT DETAILED REPORT
 // ==========================================
 router.get('/export-data', async (req, res) => {
   let connection;
@@ -462,23 +472,30 @@ router.get('/export-data', async (req, res) => {
   try {
     const { startDate, endDate, paymentMethod, paymentStatus, format = 'json' } = req.query;
 
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'startDate dan endDate diperlukan'
+      });
+    }
+
     connection = await pool.getConnection();
 
-    // Build WHERE clause
-    let whereClause = 'WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?';
+    let whereClauses = ['DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?'];
     let params = [startDate, endDate];
 
     if (paymentMethod) {
-      whereClause += ' AND t.Payment_Method = ?';
+      whereClauses.push('t.Payment_Method = ?');
       params.push(paymentMethod);
     }
 
     if (paymentStatus) {
-      whereClause += ' AND t.Payment_Status = ?';
+      whereClauses.push('t.Payment_Status = ?');
       params.push(paymentStatus);
     }
 
-    // Get all transactions for export
+    const whereClause = 'WHERE ' + whereClauses.join(' AND ');
+
     const query = `
       SELECT 
         t.Transaction_Code,
@@ -513,10 +530,11 @@ router.get('/export-data', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Export data error:', error);
+    console.error('❌ Export data error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal export data'
+      error: 'Gagal export data',
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
