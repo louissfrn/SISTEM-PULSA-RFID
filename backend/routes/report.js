@@ -206,7 +206,7 @@ router.get('/transactions', async (req, res) => {
       params.push(transactionType);
     }
 
-    // Get total count
+    // Get total count - GUNAKAN PARAMS YANG SAMA
     const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
     const [countResult] = await connection.execute(countQuery, params);
     const totalCount = countResult[0]?.total || 0;
@@ -221,8 +221,8 @@ router.get('/transactions', async (req, res) => {
         t.Payment_Method,
         t.Payment_Status,
         t.Created_At,
-        c.Name as Customer_Name,
-        c.Phone_Number as Customer_Phone,
+        COALESCE(c.Name, '-') as Customer_Name,
+        COALESCE(c.Phone_Number, '-') as Customer_Phone,
         t.Target_Phone_Number,
         pd.Detail_Name,
         pd.Nominal
@@ -234,15 +234,12 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    // PENTING: Add limit dan offset ke params
-    params.push(limitNum, offsetNum);
+    // ⚠️ CRITICAL FIX: Buat array params BARU untuk query dengan limit/offset
+    const queryParams = [...params, limitNum, offsetNum];
     
-    console.log('DEBUG - Route /transactions');
-    console.log('Params array:', params);
-    console.log('Params length:', params.length);
-    console.log('Query:', query);
+    console.log('Query params:', queryParams);
     
-    const [transactions] = await connection.execute(query, params);
+    const [transactions] = await connection.execute(query, queryParams);
 
     res.json({
       success: true,
@@ -261,7 +258,8 @@ router.get('/transactions', async (req, res) => {
     console.error('Get transactions error:', error);
     res.status(500).json({
       success: false,
-      error: 'Gagal memuat data transaksi'
+      error: 'Gagal memuat data transaksi',
+      details: error.message // ← TAMBAHKAN INI untuk debugging
     });
   } finally {
     if (connection) connection.release();
