@@ -253,10 +253,8 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    queryParams.push(limitNum, offsetNum);
-
-    const [transactions] = await connection.execute(transactionQuery, queryParams);
-
+     const [transactions] = await connection.execute(transactionQuery, [...params, limitNum, offsetNum]);
+     
     res.json({
       success: true,
       data: {
