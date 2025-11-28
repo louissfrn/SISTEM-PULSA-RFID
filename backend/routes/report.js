@@ -161,7 +161,7 @@ router.get('/daily-chart', async (req, res) => {
 });
 
 // ==========================================
-// GET TRANSACTIONS LIST (PAGINATED & FILTERABLE) - FIXED
+// GET TRANSACTIONS LIST - COMPLETELY FIXED
 // ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
@@ -182,37 +182,60 @@ router.get('/transactions', async (req, res) => {
 
     connection = await pool.getConnection();
 
-    // Build WHERE clause
-    let whereClause = 'WHERE 1=1';
-    let params = [];
+    // ==========================================
+    // STEP 1: Build WHERE conditions
+    // ==========================================
+    let whereClauses = [];
+    let countParams = [];
+    let queryParams = [];
 
     if (startDate && endDate) {
-      whereClause += ' AND DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?';
-      params.push(startDate, endDate);
+      whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
+      countParams.push(startDate, endDate);
+      queryParams.push(startDate, endDate);
     }
 
     if (paymentMethod) {
-      whereClause += ' AND t.Payment_Method = ?';
-      params.push(paymentMethod);
+      whereClauses.push('t.Payment_Method = ?');
+      countParams.push(paymentMethod);
+      queryParams.push(paymentMethod);
     }
 
     if (paymentStatus) {
-      whereClause += ' AND t.Payment_Status = ?';
-      params.push(paymentStatus);
+      whereClauses.push('t.Payment_Status = ?');
+      countParams.push(paymentStatus);
+      queryParams.push(paymentStatus);
     }
 
     if (transactionType) {
-      whereClause += ' AND t.Transaction_Type = ?';
-      params.push(transactionType);
+      whereClauses.push('t.Transaction_Type = ?');
+      countParams.push(transactionType);
+      queryParams.push(transactionType);
     }
 
-    // Get total count - GUNAKAN PARAMS YANG SAMA
-    const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
-    const [countResult] = await connection.execute(countQuery, params);
+    const whereClause = whereClauses.length > 0 
+      ? 'WHERE ' + whereClauses.join(' AND ') 
+      : '';
+
+    // ==========================================
+    // STEP 2: Get total count
+    // ==========================================
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM transaction t 
+      ${whereClause}
+    `;
+
+    console.log('📊 Count Query:', countQuery);
+    console.log('📊 Count Params:', countParams);
+
+    const [countResult] = await connection.execute(countQuery, countParams);
     const totalCount = countResult[0]?.total || 0;
 
-    // Get transactions with details
-    const query = `
+    // ==========================================
+    // STEP 3: Get transactions
+    // ==========================================
+    const transactionQuery = `
       SELECT 
         t.Transaction_ID,
         t.Transaction_Code,
@@ -234,12 +257,15 @@ router.get('/transactions', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    // ⚠️ CRITICAL FIX: Buat array params BARU untuk query dengan limit/offset
-    const queryParams = [...params, limitNum, offsetNum];
-    
-    console.log('Query params:', queryParams);
-    
-    const [transactions] = await connection.execute(query, queryParams);
+    // Add limit and offset to queryParams
+    queryParams.push(limitNum, offsetNum);
+
+    console.log('📊 Transaction Query:', transactionQuery);
+    console.log('📊 Query Params:', queryParams);
+
+    const [transactions] = await connection.execute(transactionQuery, queryParams);
+
+    console.log('✅ Fetched transactions:', transactions.length);
 
     res.json({
       success: true,
@@ -255,11 +281,13 @@ router.get('/transactions', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get transactions error:', error);
+    console.error('❌ Get transactions error:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data transaksi',
-      details: error.message // ← TAMBAHKAN INI untuk debugging
+      details: error.message
     });
   } finally {
     if (connection) connection.release();
