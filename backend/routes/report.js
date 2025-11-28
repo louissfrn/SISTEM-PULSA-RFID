@@ -226,7 +226,7 @@ router.get('/transactions', async (req, res) => {
       : '';
 
     // Get total count
-    const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
+    const countQuery = `SELECT COUNT(*) as total FROM transactions t ${whereClause}`;
     const [countResult] = await connection.execute(countQuery, countParams);
     const totalCount = countResult[0]?.total || 0;
 
@@ -245,7 +245,7 @@ router.get('/transactions', async (req, res) => {
         t.Target_Phone_Number,
         pd.Detail_Name,
         pd.Nominal
-      FROM transaction t
+      FROM transactions t
       LEFT JOIN customer c ON t.Customer_ID = c.Customer_ID
       LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
       ${whereClause}
