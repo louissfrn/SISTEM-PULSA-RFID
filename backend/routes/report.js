@@ -31,7 +31,7 @@ router.get('/summary', async (req, res) => {
       params.push(paymentStatus);
     }
 
-    const whereClause = whereClauses.length > 0 
+    const whereClause = whereClauses.length > 0
       ? 'WHERE ' + whereClauses.join(' AND ')
       : '';
 
@@ -221,8 +221,8 @@ router.get('/transactions', async (req, res) => {
       queryParams.push(transactionType);
     }
 
-    const whereClause = whereClauses.length > 0 
-      ? 'WHERE ' + whereClauses.join(' AND ') 
+    const whereClause = whereClauses.length > 0
+      ? 'WHERE ' + whereClauses.join(' AND ')
       : '';
 
     // Get total count
@@ -252,9 +252,9 @@ router.get('/transactions', async (req, res) => {
       ORDER BY t.Created_At DESC
       LIMIT ? OFFSET ?
     `;
+    queryParams.push(limitNum, offsetNum);
+    const [transactions] = await connection.execute(transactionQuery, queryParams);
 
-     const [transactions] = await connection.execute(transactionQuery, [...params, limitNum, offsetNum]);
-     
     res.json({
       success: true,
       data: {
