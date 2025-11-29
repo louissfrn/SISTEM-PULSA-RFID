@@ -752,16 +752,15 @@ router.get('/transactions', async (req, res) => {
     }
 
     if (startDate && endDate) {
-      query += ' AND DATE(t.Created_at) BETWEEN ? AND ?';
+      query += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) BETWEEN ? AND ?';
       params.push(startDate, endDate);
     } else if (startDate) {
-      query += ' AND DATE(t.Created_at) >= ?';
+      query += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) >= ?';
       params.push(startDate);
     } else if (endDate) {
-      query += ' AND DATE(t.Created_at) <= ?';
+      query += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) <= ?';
       params.push(endDate);
     }
-
     query += ' ORDER BY t.Created_at DESC';
     query += ` LIMIT ${limit} OFFSET ${offset}`;
 
@@ -780,13 +779,13 @@ router.get('/transactions', async (req, res) => {
       countParams.push(paymentStatus);
     }
     if (startDate && endDate) {
-      countQuery += ' AND DATE(t.Created_at) BETWEEN ? AND ?';
+      countQuery += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) BETWEEN ? AND ?';
       countParams.push(startDate, endDate);
     } else if (startDate) {
-      countQuery += ' AND DATE(t.Created_at) >= ?';
+      countQuery += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) >= ?';
       countParams.push(startDate);
     } else if (endDate) {
-      countQuery += ' AND DATE(t.Created_at) <= ?';
+      countQuery += ' AND DATE(CONVERT_TZ(t.Created_at, "+00:00", "+07:00")) <= ?';
       countParams.push(endDate);
     }
 
@@ -834,7 +833,7 @@ router.get('/transactions/stats', async (req, res) => {
     const params = [];
 
     if (startDate && endDate) {
-      dateFilter = ' WHERE DATE(Created_at) BETWEEN ? AND ?';
+      dateFilter = ' WHERE DATE(CONVERT_TZ(Created_at, "+00:00", "+07:00")) BETWEEN ? AND ?';
       params.push(startDate, endDate);
     }
 
