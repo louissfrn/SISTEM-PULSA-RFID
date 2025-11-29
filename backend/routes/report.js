@@ -139,7 +139,7 @@ router.get('/daily-chart', async (req, res) => {
 
     const query = `
       SELECT 
-        DATE(t.Created_At) as date,
+        DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) as date,
         COUNT(*) as transactionCount,
         SUM(CASE WHEN t.Payment_Status = 'success' THEN t.Total_Amount ELSE 0 END) as revenue,
         COUNT(CASE WHEN t.Payment_Status = 'success' THEN 1 END) as successCount,
