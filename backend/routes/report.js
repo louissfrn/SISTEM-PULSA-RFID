@@ -173,6 +173,9 @@ router.get('/daily-chart', async (req, res) => {
 // ==========================================
 // GET TRANSACTIONS LIST - COMPLETELY FIXED
 // ==========================================
+// ==========================================
+// GET TRANSACTIONS LIST - COMPLETELY FIXED
+// ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
 
@@ -221,8 +224,8 @@ router.get('/transactions', async (req, res) => {
       queryParams.push(transactionType);
     }
 
-    const whereClause = whereClauses.length > 0
-      ? 'WHERE ' + whereClauses.join(' AND ')
+    const whereClause = whereClauses.length > 0 
+      ? 'WHERE ' + whereClauses.join(' AND ') 
       : '';
 
     // Get total count
@@ -252,6 +255,7 @@ router.get('/transactions', async (req, res) => {
       ORDER BY t.Created_At DESC
       LIMIT ? OFFSET ?
     `;
+
     queryParams.push(limitNum, offsetNum);
     const [transactions] = await connection.execute(transactionQuery, queryParams);
 
@@ -269,7 +273,7 @@ router.get('/transactions', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get transactions error:', error);
+    console.error('Get transactions error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data transaksi',
