@@ -17,7 +17,7 @@ router.get('/summary', async (req, res) => {
     let params = [];
 
     if (startDate && endDate) {
-      whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
+      whereClauses.push('DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?');
       params.push(startDate, endDate);
     }
 
@@ -146,8 +146,8 @@ router.get('/daily-chart', async (req, res) => {
         COUNT(CASE WHEN t.Payment_Status = 'pending' THEN 1 END) as pendingCount,
         COUNT(CASE WHEN t.Payment_Status = 'failed' THEN 1 END) as failedCount
       FROM transaction t
-      WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
-      GROUP BY DATE(t.Created_At)
+      WHERE DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?
+      GROUP BY DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00"))
       ORDER BY date ASC
     `;
 
@@ -202,7 +202,7 @@ router.get('/transactions', async (req, res) => {
     let queryParams = [];
 
     if (startDate && endDate) {
-      whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
+      whereClauses.push('DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?');
       countParams.push(startDate, endDate);
       queryParams.push(startDate, endDate);
       console.log('Date Filter:', { startDate, endDate });
@@ -330,7 +330,7 @@ router.get('/payment-breakdown', async (req, res) => {
         SUM(CASE WHEN t.Payment_Status = 'success' THEN t.Total_Amount ELSE 0 END) as successAmount,
         AVG(t.Total_Amount) as avgAmount
       FROM transaction t
-      WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
+      WHERE DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?
       GROUP BY t.Payment_Method
       ORDER BY totalAmount DESC
     `;
@@ -382,7 +382,7 @@ router.get('/top-products', async (req, res) => {
         AVG(t.Total_Amount) as avgPrice
       FROM transaction t
       JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
-      WHERE DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
+      WHERE DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?
       GROUP BY pd.Product_Detail_ID, pd.Detail_Name, pd.Nominal
       ORDER BY totalSales DESC
       LIMIT ?
@@ -438,7 +438,7 @@ router.get('/customer-stats', async (req, res) => {
     // New customers in period
     const [newCustomers] = await connection.execute(
       `SELECT COUNT(*) as total FROM customer 
-       WHERE DATE(Registration_Date) >= ? AND DATE(Registration_Date) <= ?`,
+       WHERE DATE(CONVERT_TZ(Registration_Date, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(Registration_Date, "+00:00", "+07:00")) <= ?`,
       [startDate, endDate]
     );
 
@@ -452,7 +452,7 @@ router.get('/customer-stats', async (req, res) => {
         SUM(CASE WHEN t.Payment_Status = 'success' THEN t.Total_Amount ELSE 0 END) as totalSpent
       FROM customer c
       LEFT JOIN transaction t ON c.Customer_ID = t.Customer_ID 
-        AND DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?
+        AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?
         AND t.Payment_Status = 'success'
       GROUP BY c.Customer_ID, c.Name, c.Phone_Number
       ORDER BY totalSpent DESC
@@ -500,7 +500,7 @@ router.get('/export-data', async (req, res) => {
 
     connection = await pool.getConnection();
 
-    let whereClauses = ['DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?'];
+    let whereClauses = ['DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) >= ? AND DATE(CONVERT_TZ(t.Created_At, "+00:00", "+07:00")) <= ?'];
     let params = [startDate, endDate];
 
     if (paymentMethod) {
