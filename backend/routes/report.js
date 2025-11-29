@@ -173,9 +173,6 @@ router.get('/daily-chart', async (req, res) => {
 // ==========================================
 // GET TRANSACTIONS LIST - COMPLETELY FIXED
 // ==========================================
-// ==========================================
-// GET TRANSACTIONS LIST - COMPLETELY FIXED
-// ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
 
@@ -190,8 +187,12 @@ router.get('/transactions', async (req, res) => {
       limit = 20
     } = req.query;
 
+    console.log('📋 Request Query:', req.query);
+
     const limitNum = parseInt(limit);
     const offsetNum = (parseInt(page) - 1) * limitNum;
+
+    console.log('📊 Pagination:', { limitNum, offsetNum, page });
 
     connection = await pool.getConnection();
 
@@ -204,34 +205,45 @@ router.get('/transactions', async (req, res) => {
       whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
       countParams.push(startDate, endDate);
       queryParams.push(startDate, endDate);
+      console.log('📅 Date Filter:', { startDate, endDate });
     }
 
     if (paymentMethod) {
       whereClauses.push('t.Payment_Method = ?');
       countParams.push(paymentMethod);
       queryParams.push(paymentMethod);
+      console.log('💳 Payment Method Filter:', paymentMethod);
     }
 
     if (paymentStatus) {
       whereClauses.push('t.Payment_Status = ?');
       countParams.push(paymentStatus);
       queryParams.push(paymentStatus);
+      console.log('✅ Payment Status Filter:', paymentStatus);
     }
 
     if (transactionType) {
       whereClauses.push('t.Transaction_Type = ?');
       countParams.push(transactionType);
       queryParams.push(transactionType);
+      console.log('🔖 Transaction Type Filter:', transactionType);
     }
 
     const whereClause = whereClauses.length > 0 
       ? 'WHERE ' + whereClauses.join(' AND ') 
       : '';
 
+    console.log('🔍 WHERE Clause:', whereClause);
+    console.log('📦 Count Params:', countParams);
+
     // Get total count
     const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
+    console.log('🔢 Count Query:', countQuery);
+    
     const [countResult] = await connection.execute(countQuery, countParams);
     const totalCount = countResult[0]?.total || 0;
+    
+    console.log('📈 Total Count:', totalCount);
 
     // Get transactions
     const transactionQuery = `
@@ -253,11 +265,15 @@ router.get('/transactions', async (req, res) => {
       LEFT JOIN product_detail pd ON t.Product_Detail_ID = pd.Product_Detail_ID
       ${whereClause}
       ORDER BY t.Created_At DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${limitNum} OFFSET ${offsetNum}
     `;
 
-    queryParams.push(limitNum, offsetNum);
+    console.log('📝 Transaction Query:', transactionQuery);
+    console.log('📦 Query Params:', queryParams);
+
     const [transactions] = await connection.execute(transactionQuery, queryParams);
+
+    console.log('✅ Transactions fetched:', transactions.length);
 
     res.json({
       success: true,
@@ -273,7 +289,8 @@ router.get('/transactions', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get transactions error:', error);
+    console.error('❌ Get transactions error:', error);
+    console.error('❌ Error Stack:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data transaksi',
