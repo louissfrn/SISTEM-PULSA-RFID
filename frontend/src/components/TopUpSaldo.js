@@ -25,12 +25,12 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
     const numAmount = parseInt(amount);
     
     if (!amount || numAmount < 10000) {
-      alert('❌ Minimal top up Rp 10.000');
+      alert('Minimal top up Rp 10.000');
       return;
     }
 
     if (numAmount > 10000000) {
-      alert('❌ Maksimal top up Rp 10.000.000');
+      alert('Maksimal top up Rp 10.000.000');
       return;
     }
 
@@ -38,7 +38,7 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
       setLoading(true);
       
       if (paymentMethod === 'qris') {
-        // ✅ QRIS Payment
+        // QRIS Payment
         const response = await api.createSaldoPayment({
           customerId: customerData.customerId,
           rfidCardId: customerData.rfidCardId,
@@ -58,7 +58,7 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
           alert('Gagal membuat pembayaran: ' + response.error);
         }
       } else if (paymentMethod === 'cash') {
-        // ✅ Cash Payment
+        // Cash Payment
         console.log('Creating cash payment:', {
           customerId: customerData.customerId,
           rfidCardId: customerData.rfidCardId,
@@ -93,11 +93,11 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
     }
   };
 
-  // ✅ FIXED: Handle payment success dari PaymentModal
+  // FIXED: Handle payment success dari PaymentModal
   const handlePaymentSuccess = (result) => {
     console.log('Payment Success Result dari PaymentModal:', result);
     
-    // ✅ PaymentModal sudah emit callback dengan action
+    //PaymentModal sudah emit callback dengan action
     // TopUpSaldo hanya pass ke App.js via onBalanceUpdated
     const amountInt = parseInt(amount);
     
@@ -125,7 +125,7 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
     console.log('User cancel payment');
     setShowPayment(false); 
     setPaymentData(null);  
-    // ✅ HANYA close modal, JANGAN reset state
+    // HANYA close modal, JANGAN reset state
     // Biarkan PaymentModal handle cleanup-nya
   };
 
@@ -182,10 +182,10 @@ const TopUpSaldo = ({ customerData, onBack, onBalanceUpdated }) => {
             />
           </div>
           {amount && parseInt(amount) < 10000 && (
-            <p className="error-text">⚠️ Minimal top up Rp 10.000</p>
+            <p className="error-text">Minimal top up Rp 10.000</p>
           )}
           {amount && parseInt(amount) > 10000000 && (
-            <p className="error-text">⚠️ Maksimal top up Rp 10.000.000</p>
+            <p className="error-text">Maksimal top up Rp 10.000.000</p>
           )}
         </div>
 

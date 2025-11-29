@@ -108,7 +108,7 @@ router.get('/summary', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get report summary error:', error);
+    console.error('Get report summary error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat ringkasan laporan',
@@ -159,7 +159,7 @@ router.get('/daily-chart', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get daily chart error:', error);
+    console.error('Get daily chart error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data grafik',
@@ -171,7 +171,7 @@ router.get('/daily-chart', async (req, res) => {
 });
 
 // ==========================================
-// GET TRANSACTIONS LIST - COMPLETELY FIXED
+// Ambil Transaksi untuk munculin di menu laporan
 // ==========================================
 router.get('/transactions', async (req, res) => {
   let connection;
@@ -187,12 +187,12 @@ router.get('/transactions', async (req, res) => {
       limit = 20
     } = req.query;
 
-    console.log('📋 Request Query:', req.query);
+    console.log('Request Query:', req.query);
 
     const limitNum = parseInt(limit);
     const offsetNum = (parseInt(page) - 1) * limitNum;
 
-    console.log('📊 Pagination:', { limitNum, offsetNum, page });
+    console.log('Pagination:', { limitNum, offsetNum, page });
 
     connection = await pool.getConnection();
 
@@ -205,45 +205,45 @@ router.get('/transactions', async (req, res) => {
       whereClauses.push('DATE(t.Created_At) >= ? AND DATE(t.Created_At) <= ?');
       countParams.push(startDate, endDate);
       queryParams.push(startDate, endDate);
-      console.log('📅 Date Filter:', { startDate, endDate });
+      console.log('Date Filter:', { startDate, endDate });
     }
 
     if (paymentMethod) {
       whereClauses.push('t.Payment_Method = ?');
       countParams.push(paymentMethod);
       queryParams.push(paymentMethod);
-      console.log('💳 Payment Method Filter:', paymentMethod);
+      console.log('Payment Method Filter:', paymentMethod);
     }
 
     if (paymentStatus) {
       whereClauses.push('t.Payment_Status = ?');
       countParams.push(paymentStatus);
       queryParams.push(paymentStatus);
-      console.log('✅ Payment Status Filter:', paymentStatus);
+      console.log('Payment Status Filter:', paymentStatus);
     }
 
     if (transactionType) {
       whereClauses.push('t.Transaction_Type = ?');
       countParams.push(transactionType);
       queryParams.push(transactionType);
-      console.log('🔖 Transaction Type Filter:', transactionType);
+      console.log('Transaction Type Filter:', transactionType);
     }
 
     const whereClause = whereClauses.length > 0 
       ? 'WHERE ' + whereClauses.join(' AND ') 
       : '';
 
-    console.log('🔍 WHERE Clause:', whereClause);
-    console.log('📦 Count Params:', countParams);
+    console.log('WHERE Clause:', whereClause);
+    console.log('Count Params:', countParams);
 
     // Get total count
     const countQuery = `SELECT COUNT(*) as total FROM transaction t ${whereClause}`;
-    console.log('🔢 Count Query:', countQuery);
+    console.log('Count Query:', countQuery);
     
     const [countResult] = await connection.execute(countQuery, countParams);
     const totalCount = countResult[0]?.total || 0;
     
-    console.log('📈 Total Count:', totalCount);
+    console.log('Total Count:', totalCount);
 
     // Get transactions
     const transactionQuery = `
@@ -268,12 +268,12 @@ router.get('/transactions', async (req, res) => {
       LIMIT ${limitNum} OFFSET ${offsetNum}
     `;
 
-    console.log('📝 Transaction Query:', transactionQuery);
-    console.log('📦 Query Params:', queryParams);
+    console.log('Transaction Query:', transactionQuery);
+    console.log('Query Params:', queryParams);
 
     const [transactions] = await connection.execute(transactionQuery, queryParams);
 
-    console.log('✅ Transactions fetched:', transactions.length);
+    console.log('Transactions fetched:', transactions.length);
 
     res.json({
       success: true,
@@ -289,8 +289,8 @@ router.get('/transactions', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get transactions error:', error);
-    console.error('❌ Error Stack:', error.stack);
+    console.error('Get transactions error:', error);
+    console.error('Error Stack:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat data transaksi',
@@ -343,7 +343,7 @@ router.get('/payment-breakdown', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get payment breakdown error:', error);
+    console.error('Get payment breakdown error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat breakdown pembayaran',
@@ -396,7 +396,7 @@ router.get('/top-products', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get top products error:', error);
+    console.error('Get top products error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat produk terlaris',
@@ -471,7 +471,7 @@ router.get('/customer-stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get customer stats error:', error);
+    console.error('Get customer stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal memuat statistik pelanggan',
@@ -549,7 +549,7 @@ router.get('/export-data', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Export data error:', error);
+    console.error('Export data error:', error);
     res.status(500).json({
       success: false,
       error: 'Gagal export data',

@@ -265,7 +265,7 @@ const PulsaMenu = ({ customerData, onBack, onCustomerUpdate }) => {
           </button>
         </div>
         {phoneNumber && !api.validatePhoneNumber(phoneNumber) && (
-          <p className="error-text">⚠️ Format nomor HP tidak valid</p>
+          <p className="error-text">Format nomor HP tidak valid</p>
         )}
       </div>
 
@@ -341,7 +341,7 @@ const PulsaMenu = ({ customerData, onBack, onCustomerUpdate }) => {
                   </div>
 
                   {!canAfford && paymentMethod === 'saldo_rfid' && (
-                    <div className="insufficient-balance">💳 Saldo tidak cukup</div>
+                    <div className="insufficient-balance">Saldo tidak cukup</div>
                   )}
                 </button>
               );

@@ -111,7 +111,7 @@ const SimPurchase = ({ adminData }) => {
 
       <div className="info-banner">
         <p>
-          📋 Daftar kartu SIM yang sudah dibayar dan siap diintegrasikan dengan kartu RFID.
+          Daftar kartu SIM yang sudah dibayar dan siap diintegrasikan dengan kartu RFID.
           Tap kartu RFID ke reader atau masukkan nomor RFID manual untuk melanjutkan.
         </p>
       </div>
@@ -160,7 +160,7 @@ const SimPurchase = ({ adminData }) => {
                   </td>
                   <td>
                     <span className={`status-badge status-${purchase.Payment_Status}`}>
-                      {purchase.Payment_Status === 'success' ? '✅ Sudah Dibayar' : 'Pending'}
+                      {purchase.Payment_Status === 'success' ? 'Sudah Dibayar' : 'Pending'}
                     </span>
                   </td>
                   <td className="date-small">

@@ -450,7 +450,7 @@ const Transaction = ({ adminData }) => {
                   {selectedTransaction.Jenis || selectedTransaction.Transaction_Type || '-'}
                 </span>
               </div>
-              {/* ✅ TAMPILKAN Target Nomor HANYA untuk ISI PULSA & BELI SIM */}
+              {/*TAMPILKAN Target Nomor HANYA untuk ISI PULSA & BELI SIM */}
               {(selectedTransaction.Jenis === 'Isi Pulsa' || selectedTransaction.Jenis === 'Beli SIM') && (
                 <div className="detail-row">
                   <span className="detail-label">Target Nomor:</span>

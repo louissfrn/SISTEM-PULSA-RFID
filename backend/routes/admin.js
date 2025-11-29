@@ -67,7 +67,7 @@ router.post('/create-admin', async (req, res) => {
       [username, hashedPassword, fullName, role]
     );
 
-    console.log('✅ Admin berhasil dibuat:', {
+    console.log('Admin berhasil dibuat:', {
       adminId: result.insertId,
       username,
       fullName,
@@ -182,7 +182,7 @@ router.post('/login', async (req, res) => {
         [admin.Admin_ID]
       );
 
-      console.log('✅ Admin login success:', {
+      console.log('Admin login success:', {
         adminId: admin.Admin_ID,
         username: admin.Username,
         role: admin.Role
@@ -227,7 +227,7 @@ router.get('/customers/pending', async (req, res) => {
   try {
     connection = await pool.getConnection();
 
-    // ✅ HANYA ambil customer yang:
+    // HANYA ambil customer yang:
     // 1. Status = 'pending' (belum diaktivasi)
     // 2. TIDAK punya RFID card yang active
     const [customers] = await connection.execute(`
@@ -285,7 +285,7 @@ router.get('/customers/pending-count', async (req, res) => {
        )`
     );
 
-    // ✅ FIX: Count SIM yang payment SUCCESS tapi RFID masih PENDING
+    // FIX: Count SIM yang payment SUCCESS tapi RFID masih PENDING
     const [simResult] = await connection.execute(
       `SELECT COUNT(DISTINCT t.Transaction_ID) as count
        FROM transaction t
@@ -300,7 +300,7 @@ router.get('/customers/pending-count', async (req, res) => {
     const simCount = simResult[0].count || 0;
     const totalCount = customerCount + simCount;
 
-    console.log(`✅ Pending Count: Customer=${customerCount}, SIM=${simCount}, Total=${totalCount}`);
+    console.log(`Pending Count: Customer=${customerCount}, SIM=${simCount}, Total=${totalCount}`);
 
     res.json({
       success: true,
@@ -542,7 +542,7 @@ router.post('/reject-rfid-activation', async (req, res) => {
       });
     }
 
-    // ✅ HAPUS CUSTOMER YANG DI-REJECT
+    // HAPUS CUSTOMER YANG DI-REJECT
     await connection.execute(
       'DELETE FROM customer WHERE Customer_ID = ?',
       [customerId]
@@ -1036,8 +1036,8 @@ router.post('/approve-cash-payment', async (req, res) => {
       });
 
     } else if (transaction.Transaction_Type === 'beli_sim') {
-      console.log('🔍 DEBUG: Entering beli_sim block');
-      console.log('🔍 Customer ID:', transaction.Customer_ID);
+      console.log('DEBUG: Entering beli_sim block');
+      console.log('Customer ID:', transaction.Customer_ID);
 
       //CREATE RFID CARD dengan status PENDING
       const customerId = transaction.Customer_ID;
@@ -1051,7 +1051,7 @@ router.post('/approve-cash-payment', async (req, res) => {
         );
 
         if (existingRfidCards.length === 0) {
-          console.log('🔍 About to INSERT RFID card with customerId:', customerId);
+          console.log('About to INSERT RFID card with customerId:', customerId);
           await connection.execute(
             `INSERT INTO rfid_card (
           Customer_ID, RFID_Code, Balance, Status, 
