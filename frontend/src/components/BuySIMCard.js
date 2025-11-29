@@ -8,7 +8,7 @@ const BuySIMCard = ({ onBack }) => {
   const [barcodeInput, setBarcodeInput] = useState('');
   const [simData, setSimData] = useState(null);
   
-  // ✅ TAMBAH: Customer info form
+  // TAMBAH: Customer info form
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   
@@ -39,7 +39,7 @@ const BuySIMCard = ({ onBack }) => {
         setSimData(response.data);
         setStep('details');
         setBarcodeInput('');
-        // ✅ Reset form ketika scan barcode baru
+        //Reset form ketika scan barcode baru
         setCustomerName('');
         setCustomerEmail('');
       } else {
@@ -58,7 +58,7 @@ const BuySIMCard = ({ onBack }) => {
   const handleProceedToPayment = async () => {
     if (!simData) return;
 
-    // ✅ Validasi customer info
+    // Validasi customer info
     if (!customerName.trim()) {
       setErrorMessage('Nama lengkap wajib diisi');
       return;
@@ -280,7 +280,7 @@ const BuySIMCard = ({ onBack }) => {
             </div>
           </div>
 
-          {/* ✅ TAMBAH: Customer Information Form */}
+          {/*TAMBAH: Customer Information Form */}
           <div className="customer-info-section">
             <div className="section-header">Data Diri Customer</div>
             <div className="form-group">

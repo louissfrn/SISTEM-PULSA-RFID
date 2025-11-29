@@ -29,7 +29,7 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
         setCountdown(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            console.log('⏰ Countdown finished');
+            console.log('Countdown finished');
             return 0;
           }
           return prev - 1;
@@ -41,12 +41,12 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
         checkPaymentStatus();
       }, 5000);
 
-      console.log('✅ Interval check started every 5 seconds');
+      console.log('Interval check started every 5 seconds');
 
       return () => {
         clearInterval(timer);
         clearInterval(statusChecker);
-        console.log('🛑 Modal cleanup - intervals cleared');
+        console.log('Modal cleanup - intervals cleared');
       };
     }
   }, [isOpen, paymentData]);
@@ -68,24 +68,24 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
     
     try {
       setCheckingPayment(true);
-      console.log(`🔍 Checking status for order: ${paymentData.order_id}`);
+      console.log(`Checking status for order: ${paymentData.order_id}`);
       
       const response = await api.get(`/api/payment/status/${paymentData.order_id}`);
       
-      console.log(`📥 Response: ${JSON.stringify({success: response.success, status: response.data?.transaction_status})}`);
+      console.log(`Response: ${JSON.stringify({success: response.success, status: response.data?.transaction_status})}`);
 
       if (response && response.success && response.data) {
         const txData = response.data;
         const txStatus = txData?.transaction_status;
         
-        console.log(`✓ Transaction status: ${txStatus}`);
+        console.log(`Transaction status: ${txStatus}`);
         
         if (txStatus === 'settlement' || txStatus === 'capture') {
-          console.log('🎉 PAYMENT SUCCESS DETECTED!');
+          console.log('PAYMENT SUCCESS DETECTED!');
           setPaymentStatus('success');
           setSuccessMessage('Selamat! Pembayaran Anda berhasil.');
           
-          // ✅ JANGAN PANGGIL CALLBACK DI SINI!
+          // JANGAN PANGGIL CALLBACK DI SINI!
           // Biarkan user klik button dulu
           // Callback akan dipanggil dari handleSelesai() atau handleTransaksiLagi()
 
@@ -101,10 +101,10 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
           }, 2000);
         }
       } else {
-        console.log(`❌ Response error: ${JSON.stringify(response)}`);
+        console.log(`Response error: ${JSON.stringify(response)}`);
       }
     } catch (error) {
-      console.error(`❌ Error: ${error.message}`);
+      console.error(`Error: ${error.message}`);
     } finally {
       setCheckingPayment(false);
     }
@@ -117,7 +117,7 @@ const PaymentModal = ({ isOpen, onClose, paymentData, onPaymentSuccess }) => {
   };
 
   const handleCancel = async () => {
-  console.log('🔴 CANCEL BUTTON CLICKED');
+  console.log('CANCEL BUTTON CLICKED');
   console.log('Transaction ID:', paymentData?.transaction_id);
   
   try {

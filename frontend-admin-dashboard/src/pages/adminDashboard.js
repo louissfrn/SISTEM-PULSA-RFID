@@ -39,7 +39,7 @@ const AdminDashboard = () => {
       if (countResult.success) {
         setStats({
           ...result.data,
-          pendingCustomers: countResult.data.totalCount  // ✅ Ubah ke total
+          pendingCustomers: countResult.data.totalCount  //Ubah ke total
         });
       } else {
         setStats(result.data);

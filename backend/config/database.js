@@ -17,7 +17,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
   acquireTimeout: 60000,
   timeout: 60000,
-  connectTimeout: 60000,  // ← TAMBAH INI
+  connectTimeout: 60000, 
   reconnect: true
 });
 

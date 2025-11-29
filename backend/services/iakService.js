@@ -3,10 +3,10 @@ const crypto = require('crypto');
 
 class IAKService {
   constructor() {
-    // ✅ Username menggunakan nomor HP (sesuai dokumentasi)
+    // Username menggunakan nomor HP (sesuai dokumentasi)
     this.username = '082145255949'; // Sesuai dengan yang terlihat di log
     this.apiKey = '89068d7a087d6744YuGy';
-    // ✅ Base URL production tanpa /api (akan ditambahkan di endpoint)
+    // Base URL production tanpa /api (akan ditambahkan di endpoint)
     this.baseURL = 'https://prepaid.iak.id';
   }
 
@@ -37,7 +37,7 @@ class IAKService {
         sign: this.generateSignature({ ref_id: transactionId })
       };
 
-      // ✅ URL endpoint yang benar (tanpa duplikasi path)
+      // URL endpoint yang benar (tanpa duplikasi path)
       const fullURL = `${this.baseURL}/api/top-up`;
       
       console.log('=== IAK REQUEST (FINAL FORMAT) ===');

@@ -72,7 +72,7 @@ router.post('/register', async (req, res) => {
 
     await connection.commit();
 
-    console.log('✅ New customer created:', {
+    console.log('New customer created:', {
       customerId,
       name,
       phone,
@@ -99,7 +99,7 @@ router.post('/register', async (req, res) => {
     if (connection) {
       await connection.rollback();
     }
-    console.error('❌ Registration error:', error.message);
+    console.error('Registration error:', error.message);
     res.status(500).json({
       success: false,
       error: 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.',

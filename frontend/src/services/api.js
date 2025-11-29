@@ -11,7 +11,7 @@ const apiClient = axios.create({
 });
 
 const api = {
-  // ✅ TAMBAH METHOD INI
+  //TAMBAH METHOD INI
   post: async (endpoint, data) => {
     try {
       const response = await apiClient.post(endpoint, data);

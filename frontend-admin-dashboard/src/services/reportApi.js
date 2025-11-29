@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// ✅ URL Backend Render
+// URL Backend Render
 const API_BASE_URL = 'https://sistem-pulsa-rfid.onrender.com/api';
 
 const reportApi = {

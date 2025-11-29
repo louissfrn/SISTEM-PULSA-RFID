@@ -101,7 +101,7 @@ router.post('/create-saldo-payment', async (req, res) => {
     );
 
     if (paymentResult.success) {
-      // ✅ CONSOLIDATE: Hanya simpan ke TRANSACTION, tidak ke PAYMENT table
+      // CONSOLIDATE: Hanya simpan ke TRANSACTION, tidak ke PAYMENT table
       // Semua data payment sudah ada di TRANSACTION table
 
       await connection.commit();
@@ -362,7 +362,7 @@ router.post('/midtrans-notification', async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // ✅ CONSOLIDATE: Query langsung ke TRANSACTION, tidak ke PAYMENT
+    // CONSOLIDATE: Query langsung ke TRANSACTION, tidak ke PAYMENT
     const [transaction] = await connection.execute(
       `SELECT 
         t.*,
@@ -459,7 +459,7 @@ router.get('/status/:orderId', async (req, res) => {
 
   try {
     const { orderId } = req.params;
-    console.log('🔍 Checking payment status for:', orderId);
+    console.log('Checking payment status for:', orderId);
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -516,7 +516,7 @@ router.get('/status/:orderId', async (req, res) => {
 
     // FALLBACK: Kalau Midtrans error tapi pembayaran sudah masuk database
     if (!result.success) {
-      console.log('⚠️ Midtrans API error, checking database status...');
+      console.log('Midtrans API error, checking database status...');
 
       if (transaction[0].Payment_Status === 'success') {
         console.log('Payment already SUCCESS in database');

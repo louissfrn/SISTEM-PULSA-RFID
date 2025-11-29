@@ -16,7 +16,7 @@ router.post('/purchase-qris', async (req, res) => {
       });
     }
 
-    // ✅ Validasi customer info
+    // Validasi customer info
     if (!customerName || !customerEmail) {
       return res.status(400).json({
         success: false,
@@ -106,7 +106,7 @@ const paymentResult = await midtransService.createSimPayment(
 
 if (paymentResult.success) {
   await connection.commit();
-  console.log('✅ SIM QRIS Purchase created:', {
+  console.log('SIM QRIS Purchase created:', {
     transactionId,
     rfidCardId,
     customerId,
@@ -155,7 +155,7 @@ router.post('/purchase-cash', async (req, res) => {
       });
     }
 
-    // ✅ Validasi customer info
+    // Validasi customer info
     if (!customerName || !customerEmail) {
       return res.status(400).json({
         success: false,
@@ -180,7 +180,7 @@ router.post('/purchase-cash', async (req, res) => {
     }
 
     // ==========================================
-    // ✅ STEP 1: Insert atau cek customer
+    // STEP 1: Insert atau cek customer
     // ==========================================
     const [existingCustomer] = await connection.execute(
       'SELECT Customer_ID FROM customer WHERE Phone_Number = ? AND Email = ?',
@@ -190,7 +190,7 @@ router.post('/purchase-cash', async (req, res) => {
     let customerId;
     if (existingCustomer.length > 0) {
       customerId = existingCustomer[0].Customer_ID;
-      console.log('📌 Customer sudah ada:', customerId);
+      console.log('Customer sudah ada:', customerId);
     } else {
       const [customerResult] = await connection.execute(
         `INSERT INTO customer (Name, Phone_Number, Email, Status, Registration_Date, Updated_at)
@@ -198,7 +198,7 @@ router.post('/purchase-cash', async (req, res) => {
         [customerName.trim(), phoneNumber, customerEmail.trim()]
       );
       customerId = customerResult.insertId;
-      console.log('✅ Customer baru dibuat:', { customerId, customerName, phoneNumber, customerEmail });
+      console.log('Customer baru dibuat:', { customerId, customerName, phoneNumber, customerEmail });
     }
 
     const transactionCode = `SIM${Date.now()}`;
@@ -490,7 +490,7 @@ router.get('/admin/pending-sim', async (req, res) => {
       RFID_Status: p.RFID_Status
     }));
 
-    console.log('🔍 Formatted data:', formattedData);
+    console.log('Formatted data:', formattedData);
 
     res.json({
       success: true,
@@ -625,10 +625,10 @@ router.post('/admin/confirm-sim-payment', async (req, res) => {
 
       rfidCard = existingRfidCards[0];
 
-      // ✅ FIX #2: CEK apakah status sudah 'active' → REJECT!
+      // FIX #2: CEK apakah status sudah 'active' → REJECT!
       if (rfidCard.Status === 'active') {
         await connection.rollback();
-        console.error('❌ RFID card sudah aktif:', {
+        console.error('RFID card sudah aktif:', {
           rfidCardId: rfidCard.RFID_Card_ID,
           status: rfidCard.Status
         });
@@ -639,7 +639,7 @@ router.post('/admin/confirm-sim-payment', async (req, res) => {
         });
       }
 
-      // ✅ UPDATE RFID card
+      // UPDATE RFID card
       await connection.execute(
         `UPDATE rfid_card 
      SET RFID_Code = ?, Status = 'active', Activated_At = NOW(), Activated_By = ?, Updated_at = NOW()
@@ -647,7 +647,7 @@ router.post('/admin/confirm-sim-payment', async (req, res) => {
         [rfidCode, adminId, rfidCard.RFID_Card_ID]
       );
 
-      // ✅ FIX #1: UPDATE object rfidCard dengan RFID_Code baru
+      // FIX #1: UPDATE object rfidCard dengan RFID_Code baru
       rfidCard.RFID_Code = rfidCode;
       rfidCard.Status = 'active';
 

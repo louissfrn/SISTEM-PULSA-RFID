@@ -21,32 +21,32 @@ const PendingCustomers = ({ adminData, onActivationSuccess }) => {
  const loadPendingCustomers = async () => {
   try {
     setLoading(true);
-    console.log('🔄 Loading pending customers...');
+    console.log('Loading pending customers...');
     
     // Ambil pending customers
     const customerResult = await adminApi.getPendingCustomers();
-    console.log('📌 Customer result:', customerResult);
+    console.log('Customer result:', customerResult);
     
     // Ambil pending SIM purchases
     const simResult = await adminApi.getPendingSIMPurchases();
-    console.log('📌 SIM result:', simResult);
+    console.log('SIM result:', simResult);
 
     let allData = [];
     
     if (customerResult.success && customerResult.data) {
-      console.log('✅ Added customer data:', customerResult.data.length);
+      console.log('Added customer data:', customerResult.data.length);
       allData = [...customerResult.data];
     }
     
     if (simResult.success && simResult.data) {
-      console.log('✅ Added SIM data:', simResult.data.length);
+      console.log('Added SIM data:', simResult.data.length);
       allData = [...allData, ...simResult.data];
     }
     
-    console.log('📊 Total data:', allData.length, allData);
+    console.log('Total data:', allData.length, allData);
     setAllCustomers(allData);
   } catch (error) {
-    console.error('❌ Load pending customers error:', error);
+    console.error('Load pending customers error:', error);
   } finally {
     setLoading(false);
   }
@@ -133,8 +133,8 @@ const PendingCustomers = ({ adminData, onActivationSuccess }) => {
 
         if (result.success) {
 
-          console.log('🔍 Result data:', result.data);
-          console.log('🔍 RFID Code:', result.data.rfidCode);
+          console.log('Result data:', result.data);
+          console.log('RFID Code:', result.data.rfidCode);
           alert(`Aktivasi SIM Berhasil!\n\nNomor: ${result.data.phoneNumber}\nRFID: ${result.data.rfidCode}`);
 
           setShowActivateModal(false);
