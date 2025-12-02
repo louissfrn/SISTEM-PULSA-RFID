@@ -324,28 +324,12 @@ app.post('/api/admin/sim-cards/:simId/delete', async (req, res) => {
 });
 
 // =======================================
-// RFID SCAN
+// Scan RFID Pelanggan
 // =======================================
 app.post('/api/rfid/scan', async (req, res) => {
   try {
     const { rfidCode } = req.body;
-    console.log('📱 RFID Scan:', rfidCode);
-
-    if (!rfidCode) {
-      return res.json({
-        success: true,
-        data: {
-          rfidCode: 'RFID001234567890',
-          customerId: 1,
-          rfidCardId: 1,
-          name: 'John Doe',
-          phone: '081234567890',
-          balance: 50000,
-          detectedProvider: 'telkomsel'
-        },
-        message: 'RFID scan successful (simulated)'
-      });
-    }
+    console.log('RFID Scan:', rfidCode);
 
     const [results] = await db.execute(`
       SELECT rc.RFID_Card_ID, rc.RFID_Code, rc.Balance, rc.Status as Card_Status,
@@ -389,7 +373,7 @@ app.post('/api/rfid/scan', async (req, res) => {
 });
 
 // =======================================
-// GET PRODUCTS
+// tampilkan produk pulsa berdasarkan provider
 // =======================================
 app.get('/api/products/pulsa/:provider', async (req, res) => {
   try {
@@ -409,29 +393,12 @@ app.get('/api/products/pulsa/:provider', async (req, res) => {
 });
 
 // =======================================
-// BARCODE SCAN 
+// Scan Barcode pada kemasan kartu SIM
 // =======================================
 app.post('/api/sim/scan-barcode', async (req, res) => {
   try {
     const { barcode } = req.body;
     console.log('Barcode Scan:', barcode);
-
-    if (!barcode) {
-      return res.json({
-        success: true,
-        data: {
-          simId: 1,
-          phoneNumber: '081234567890',
-          provider: 'telkomsel',
-          barcode: 'SIM001TSL2024',
-          purchasePrice: 40000,
-          sellingPrice: 50000,
-          productDetailId: 27,
-          productType: 'Beli SIM'
-        },
-        message: 'Barcode scan successful (simulated)'
-      });
-    }
 
     const [simCards] = await db.execute(
       'SELECT * FROM sim_card WHERE Barcode = ? AND Status = "available"',
