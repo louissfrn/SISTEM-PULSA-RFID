@@ -611,7 +611,7 @@ router.get('/status/:orderId', async (req, res) => {
   }
 });
 
-// Cancel payment
+// Cancel payment ketika customer klik button cancel pada QRIS pembelian kartu SIM
 router.post('/cancel-payment', async (req, res) => {
   let connection;
 
@@ -627,16 +627,46 @@ router.post('/cancel-payment', async (req, res) => {
 
     connection = await pool.getConnection();
 
-    // Update transaksi ke cancelled
-    await connection.execute(
-      'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
-      ['cancelled', transactionId]
+    //CEK STATUS DULU - HANYA CANCEL JIKA PENDING
+    const [transaction] = await connection.execute(
+      'SELECT Payment_Status FROM transaction WHERE Transaction_ID = ?',
+      [transactionId]
     );
 
-    connection.release();
-    console.log('Transaction cancelled:', transactionId);
+    if (transaction.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        error: 'Transaction not found'
+      });
+    }
 
-    res.json({ success: true });
+    const currentStatus = transaction[0].Payment_Status;
+
+    // HANYA CANCEL JIKA STATUS MASIH PENDING
+    if (currentStatus === 'pending') {
+      await connection.execute(
+        'UPDATE transaction SET Payment_Status = ? WHERE Transaction_ID = ?',
+        ['cancelled', transactionId]
+      );
+
+      console.log('Transaction cancelled by customer:', transactionId);
+      connection.release();
+      
+      res.json({ 
+        success: true,
+        message: 'Transaksi berhasil dibatalkan'
+      });
+    } else {
+      console.log('Cannot cancel - transaction already:', currentStatus);
+      connection.release();
+      
+      res.json({ 
+        success: false,
+        error: `Transaksi tidak dapat dibatalkan karena sudah ${currentStatus}`
+      });
+    }
+
   } catch (error) {
     if (connection) connection.release();
     console.error('Cancel payment error:', error);
