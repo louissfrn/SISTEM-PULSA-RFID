@@ -280,6 +280,26 @@ const handleExportPDF = async () => {
           </div>
 
           <div className="filter-group">
+            <label>Dari bulan</label>
+            <input
+              type="date"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>Sampai Bulan</label>
+            <input
+              type="date"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          <div className="filter-group">
             <label>Metode Pembayaran</label>
             <select name="paymentMethod" value={filters.paymentMethod} onChange={handleFilterChange}>
               <option value="">Semua</option>
