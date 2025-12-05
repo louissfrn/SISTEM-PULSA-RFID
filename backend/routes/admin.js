@@ -5,7 +5,7 @@ const iakService = require('../services/iakService');
 const router = express.Router();
 
 // ==========================================
-// CREATE NEW ADMIN
+// CREATE NEW ADMIN 
 // ==========================================
 router.post('/create-admin', async (req, res) => {
   let connection;
@@ -13,7 +13,7 @@ router.post('/create-admin', async (req, res) => {
   try {
     const { username, fullName, password, confirmPassword, role } = req.body;
 
-    // Validation
+    // CARA KERJA 1: Validasi field wajib diisi
     if (!username || !fullName || !password || !confirmPassword || !role) {
       return res.status(400).json({
         success: false,
@@ -35,34 +35,37 @@ router.post('/create-admin', async (req, res) => {
       });
     }
 
-    if (!preg_match('/[A-Z]/', $password)) {
+    if (!/[A-Z]/.test(password)) {
       return res.status(400).json({
         success: false,
-        error: 'Password harus mengandung huruf besar (A-Z)'
+        error: 'Password harus mengandung minimal 1 huruf besar (A-Z)'
       });
     }
 
-     if (!preg_match('/[a-z]/', $password)) {
+   
+    if (!/[a-z]/.test(password)) {
       return res.status(400).json({
         success: false,
-        error: 'Password harus mengandung huruf besar (A-Z)'
+        error: 'Password harus mengandung minimal 1 huruf kecil (a-z)'
       });
     }
 
-    if (!preg_match('/[0-9]/', $password)) {
+ 
+    if (!/[0-9]/.test(password)) {
       return res.status(400).json({
         success: false,
-        error: 'Password harus mengandung angka (0-9)'
-      });
-    }
-    
-    if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) {
-      return res.status(400).json({
-        success: false,
-        error: "Password harus mengandung tanda baca (!@#$%^&*()_+-=[]{}|;':\",./<>?)"
+        error: 'Password harus mengandung minimal 1 angka (0-9)'
       });
     }
 
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password harus mengandung minimal 1 simbol (!@#$%^&*()_+-=[]{}|;:\'",.<>/?)'
+      });
+    }
+
+  
     if (!['administrator', 'kasir'].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -70,10 +73,8 @@ router.post('/create-admin', async (req, res) => {
       });
     }
 
-    $success = '';
-$error = '';
+    connection = await pool.getConnection();
 
-    // Check jika username sudah ada
     const [existingAdmin] = await connection.execute(
       'SELECT Admin_ID FROM admin WHERE Username = ?',
       [username]
@@ -85,11 +86,9 @@ $error = '';
         error: 'Username sudah terdaftar'
       });
     }
-
-    // Hash password dengan bcrypt
+  
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert admin baru
     const [result] = await connection.execute(
       `INSERT INTO admin (Username, Password_hash, Full_Name, Role, Status, Created_at, Updated_at)
        VALUES (?, ?, ?, ?, 'active', NOW(), NOW())`,
