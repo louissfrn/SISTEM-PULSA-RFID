@@ -35,6 +35,34 @@ router.post('/create-admin', async (req, res) => {
       });
     }
 
+    if (!preg_match('/[A-Z]/', $password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password harus mengandung huruf besar (A-Z)'
+      });
+    }
+
+     if (!preg_match('/[a-z]/', $password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password harus mengandung huruf besar (A-Z)'
+      });
+    }
+
+    if (!preg_match('/[0-9]/', $password)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password harus mengandung angka (0-9)'
+      });
+    }
+    
+    if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) {
+      return res.status(400).json({
+        success: false,
+        error: "Password harus mengandung tanda baca (!@#$%^&*()_+-=[]{}|;':\",./<>?)"
+      });
+    }
+
     if (!['administrator', 'kasir'].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -42,7 +70,8 @@ router.post('/create-admin', async (req, res) => {
       });
     }
 
-    connection = await pool.getConnection();
+    $success = '';
+$error = '';
 
     // Check jika username sudah ada
     const [existingAdmin] = await connection.execute(

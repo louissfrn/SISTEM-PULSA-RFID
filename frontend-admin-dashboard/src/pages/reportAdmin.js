@@ -10,6 +10,7 @@ const ReportAdmin = ({ adminData }) => {
     period: 'monthly',
     startDate: getDefaultStartDate(),
     endDate: new Date().toISOString().split('T')[0],
+    endMonth: new Month().toISOString().split('T')[0],
     paymentMethod: '',
     paymentStatus: '',
     transactionType: ''
@@ -93,6 +94,7 @@ const ReportAdmin = ({ adminData }) => {
       period: 'monthly',
       startDate: getDefaultStartDate(),
       endDate: new Date().toISOString().split('T')[0],
+      endMonth: new Month().toISOString().split('T')[0],
       paymentMethod: '',
       paymentStatus: '',
       transactionType: ''
