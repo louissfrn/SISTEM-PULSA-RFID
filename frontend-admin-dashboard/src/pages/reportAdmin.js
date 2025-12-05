@@ -282,8 +282,8 @@ const handleExportPDF = async () => {
           <div className="filter-group">
             <label>Dari bulan</label>
             <input
-              type="date"
-              name="endDate"
+              type="month"
+              name="endMonth"
               value={filters.endMonth}
               onChange={handleFilterChange}
             />
@@ -292,8 +292,8 @@ const handleExportPDF = async () => {
           <div className="filter-group">
             <label>Sampai Bulan</label>
             <input
-              type="date"
-              name="endDate"
+              type="month"
+              name="endMonth"
               value={filters.endMonth}
               onChange={handleFilterChange}
             />
