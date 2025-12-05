@@ -284,7 +284,7 @@ const handleExportPDF = async () => {
             <input
               type="date"
               name="endDate"
-              value={filters.endDate}
+              value={filters.endMonth}
               onChange={handleFilterChange}
             />
           </div>
@@ -294,7 +294,7 @@ const handleExportPDF = async () => {
             <input
               type="date"
               name="endDate"
-              value={filters.endDate}
+              value={filters.endMonth}
               onChange={handleFilterChange}
             />
           </div>
