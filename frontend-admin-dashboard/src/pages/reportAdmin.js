@@ -7,14 +7,14 @@ import jsPDF from 'jspdf';
 const ReportAdmin = ({ adminData }) => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    period: 'monthly',
-    startDate: getDefaultStartDate(),
-    endDate: new Date().toISOString().split('T')[0],
-    endMonth: new Month().toISOString().split('T')[0],
-    paymentMethod: '',
-    paymentStatus: '',
-    transactionType: ''
-  });
+  period: 'monthly',
+  startDate: getDefaultStartDate(),
+  endDate: new Date().toISOString().split('T')[0],
+  endMonth: new Date().toISOString().slice(0, 7),
+  paymentMethod: '',
+  paymentStatus: '',
+  transactionType: ''
+});
 
   const [data, setData] = useState({
     summary: null,
@@ -90,17 +90,17 @@ const ReportAdmin = ({ adminData }) => {
   };
 
   const handleResetFilters = () => {
-    setFilters({
-      period: 'monthly',
-      startDate: getDefaultStartDate(),
-      endDate: new Date().toISOString().split('T')[0],
-      endMonth: new Month().toISOString().split('T')[0],
-      paymentMethod: '',
-      paymentStatus: '',
-      transactionType: ''
-    });
-    setCurrentPage(1);
-  };
+  setFilters({
+    period: 'monthly',
+    startDate: getDefaultStartDate(),
+    endDate: new Date().toISOString().split('T')[0],
+    endMonth: new Date().toISOString().slice(0, 7),
+    paymentMethod: '',
+    paymentStatus: '',
+    transactionType: ''
+  });
+  setCurrentPage(1);
+};
 
 const handleExportPDF = async () => {
   try {
