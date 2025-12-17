@@ -1,15 +1,18 @@
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-  host: 'localhost',
+  host: 'interchange.proxy.rlwy.net',
   user: 'root',
-  password: '', 
-  database: 'sistem_rfid_lijaya', 
-  port: 3306,
+  password: 'GuNRzsposwpMYpJnUXplXpzTvKkbJbJi',
+  database: 'railway',
+  port: 19399,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 60000
+  acquireTimeout: 60000,
+  timeout: 60000,
+  connectTimeout: 60000, 
+  reconnect: true
 });
 
 const testConnection = async () => {
