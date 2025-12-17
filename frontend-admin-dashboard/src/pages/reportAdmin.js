@@ -81,13 +81,30 @@ const ReportAdmin = ({ adminData }) => {
   }, [loadReportData]);
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
+  
+  // Kalau yang diubah adalah filter bulan
+  if (name === 'endMonth' && value) {
+    const [year, month] = value.split('-');
+    const startOfMonth = `${year}-${month}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endOfMonth = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+    
+    setFilters(prev => ({
+      ...prev,
+      endMonth: value,
+      startDate: startOfMonth,
+      endDate: endOfMonth
+    }));
+  } else {
     setFilters(prev => ({
       ...prev,
       [name]: value
     }));
-    setCurrentPage(1);
-  };
+  }
+  
+  setCurrentPage(1);
+};
 
   const handleResetFilters = () => {
   setFilters({
