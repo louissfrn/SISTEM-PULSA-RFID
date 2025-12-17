@@ -7,11 +7,11 @@ const mysql = require('mysql2/promise');
 
 // Create connection pool
 const pool = mysql.createPool({
-  host: 'interchange.proxy.rlwy.net',
-  user: 'root',
-  password: 'GuNRzsposwpMYpJnUXplXpzTvKkbJbJi',
-  database: 'railway',
-  port: 19399,
+  host: 'localhost',             
+  user: 'root',                  
+  password: '',                   
+  database: 'sistem_rfid_lijaya',  
+  port: 3306,                      
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -25,7 +25,7 @@ const pool = mysql.createPool({
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('Database pool connected successfully');
+    console.log('Database pool connected successfully to LOCAL MySQL');
     connection.release();
   } catch (error) {
     console.error('Database pool connection failed:', error.message);

@@ -13,7 +13,6 @@ router.post('/create-admin', async (req, res) => {
   try {
     const { username, fullName, password, confirmPassword, role } = req.body;
 
-    // CARA KERJA 1: Validasi field wajib diisi
     if (!username || !fullName || !password || !confirmPassword || !role) {
       return res.status(400).json({
         success: false,

@@ -4,7 +4,7 @@ const iakService = require('../services/iakService');
 
 const router = express.Router();
 
-// Create transaction untuk isi pulsa
+// Buat transaksi untuk isi pulsa
 router.post('/create-pulsa', async (req, res) => {
   let connection;
 
@@ -17,7 +17,7 @@ router.post('/create-pulsa', async (req, res) => {
       paymentMethod
     } = req.body;
 
-    // Validation
+    // Validasi
     if (!customerId || !productDetailId || !targetPhone || !paymentMethod) {
       return res.status(400).json({
         success: false,
