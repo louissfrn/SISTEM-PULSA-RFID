@@ -324,7 +324,7 @@ const handleExportPDF = async () => {
               <option value="">Semua</option>
               <option value="qris">QRIS</option>
               <option value="saldo_rfid">Saldo RFID</option>
-              <option value="kasir">Bayar Kasir</option>
+              <option value="cash">Bayar Kasir</option>
             </select>
           </div>
 
